@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { queryBot, ingestPdfs } from './services/api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -654,14 +653,13 @@ function TypingIndicator({ stage }: { stage: number }) {
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [docs, setDocs] = useState<Doc[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [activeDoc, setActiveDoc] = useState<string | null>(null);
+  const [docs, setDocs] = useState<Doc[]>(SEED_DOCS);
+  const [messages, setMessages] = useState<Message[]>(SEED_MESSAGES);
+  const [activeDoc, setActiveDoc] = useState<string | null>('d1');
   const [inputText, setInputText] = useState('');
   const [lang, setLang] = useState<'EN' | 'HI'>('EN');
   const [micActive, setMicActive] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const recognitionRef = useRef<any>(null);
   const [retrievalStage, setRetrievalStage] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -731,74 +729,44 @@ export default function App() {
     setTimeout(advance, 520 + Math.random() * 260);
   }
 
-  // Query the real backend API
-  async function fetchReply(question: string): Promise<{ text: string; citations: Citation[]; meta: ResponseMeta }> {
-    const startTime = Date.now();
-    const response = await queryBot(question);
-    const latencyMs = Date.now() - startTime;
-    const answer: string = response.answer || 'I could not generate an answer.';
-    const rawSources = response.sources || [];
-    const citations: Citation[] = rawSources.map((src: any, idx: number) => ({
-      docId: `src-${idx}`,
-      docName: src.file ? src.file.split('/').pop() : 'Unknown',
-      page: src.pages?.[0] ?? 1,
-      snippet: '',
-      relevance: undefined,
-    }));
+  function buildReply(): { text: string; citations: Citation[]; meta: ResponseMeta } {
     return {
-      text: answer,
-      citations,
-      meta: { chunks: citations.length, latencyMs, tokens: Math.round(answer.length / 4) },
+      text:
+        lang === 'EN'
+          ? 'Based on the indexed corpus, I have located relevant provisions. The matter you describe engages **Section 26 and Section 28** of the Land Acquisition Act, 2013, which govern compensation determination and solatium respectively.\n\n**Key finding:** The market value must be determined as of the date of publication of the notification under Section 4(1). The collector must award an additional **100% solatium** over market value in recognition of compulsory acquisition.\n\nI recommend cross-referencing the cited passage with the applicable state-level rules, as several states have notified modifications under Schedule I.'
+          : 'अनुक्रमित संग्रह के आधार पर, मैंने संबंधित प्रावधान खोजे हैं। आपके द्वारा वर्णित मामला भूमि अधिग्रहण अधिनियम, 2013 की **धारा 26 और धारा 28** से संबंधित है।\n\n**मुख्य निष्कर्ष:** बाजार मूल्य धारा 4(1) के तहत अधिसूचना प्रकाशन की तिथि के अनुसार निर्धारित किया जाना चाहिए।',
+      citations: [
+        { docId: 'd4', docName: 'LandAcquisition_Act.pdf', page: 26, relevance: 0.93, snippet: '§ 26. Determination of amount of compensation.—The Collector having determined the market value of the land, shall proceed to make an award under this Act in the prescribed form.' },
+        { docId: 'd4', docName: 'LandAcquisition_Act.pdf', page: 28, relevance: 0.79, snippet: '§ 28. Solatium.—In addition to the market value of the land, the Collector shall in every case award a sum of one hundred per centum over the market value, in consideration of the compulsory nature of the acquisition.' },
+      ],
+      meta: { chunks: 5, latencyMs: Math.round(1600 + Math.random() * 900), tokens: Math.round(360 + Math.random() * 120) },
     };
   }
 
   const handleRegen = useCallback((id: string) => {
     autoScroll.current = true;
-    // Find the user message preceding the AI message being regenerated
-    const msgIndex = messages.findIndex((m) => m.id === id);
-    let questionText = '';
-    for (let i = msgIndex - 1; i >= 0; i--) {
-      if (messages[i].role === 'user') {
-        questionText = messages[i].text;
-        break;
-      }
-    }
-    if (!questionText) return;
-
     const aiId = `m${Date.now()}`;
     // Remove the old AI message being regenerated
     setMessages((prev) => prev.filter((m) => m.id !== id));
-    runPipeline(async () => {
-      try {
-        const reply = await fetchReply(questionText);
-        const placeholder: Message = {
-          id: aiId,
-          role: 'ai',
-          text: '',
-          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-          streaming: true,
-          feedback: null,
-        };
-        setMessages((prev) => [...prev, placeholder]);
-        streamInto(aiId, reply.text, () => {
-          setMessages((prev) =>
-            prev.map((m) => (m.id === aiId ? { ...m, citations: reply.citations, meta: reply.meta } : m))
-          );
-        });
-      } catch (err) {
-        console.error('Regeneration failed:', err);
-        const errMsg: Message = {
-          id: aiId,
-          role: 'ai',
-          text: 'Sorry, I encountered an error while regenerating the response. Please try again.',
-          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-          feedback: null,
-        };
-        setMessages((prev) => [...prev, errMsg]);
-      }
+    runPipeline(() => {
+      const reply = buildReply();
+      const placeholder: Message = {
+        id: aiId,
+        role: 'ai',
+        text: '',
+        timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+        streaming: true,
+        feedback: null,
+      };
+      setMessages((prev) => [...prev, placeholder]);
+      streamInto(aiId, reply.text, () => {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === aiId ? { ...m, citations: reply.citations, meta: reply.meta } : m))
+        );
+      });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages]);
+  }, [lang]);
 
   const handleCopy = useCallback((id: string) => {
     const msg = messages.find((m) => m.id === id);
@@ -825,34 +793,22 @@ export default function App() {
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
 
     const aiId = `m${Date.now() + 1}`;
-    runPipeline(async () => {
-      try {
-        const reply = await fetchReply(t);
-        const placeholder: Message = {
-          id: aiId,
-          role: 'ai',
-          text: '',
-          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-          streaming: true,
-          feedback: null,
-        };
-        setMessages((prev) => [...prev, placeholder]);
-        streamInto(aiId, reply.text, () => {
-          setMessages((prev) =>
-            prev.map((m) => (m.id === aiId ? { ...m, citations: reply.citations, meta: reply.meta } : m))
-          );
-        });
-      } catch (err) {
-        console.error('Query failed:', err);
-        const errMsg: Message = {
-          id: aiId,
-          role: 'ai',
-          text: 'Sorry, I encountered an error while processing your question. Please ensure the backend is running and documents have been ingested.',
-          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-          feedback: null,
-        };
-        setMessages((prev) => [...prev, errMsg]);
-      }
+    runPipeline(() => {
+      const reply = buildReply();
+      const placeholder: Message = {
+        id: aiId,
+        role: 'ai',
+        text: '',
+        timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+        streaming: true,
+        feedback: null,
+      };
+      setMessages((prev) => [...prev, placeholder]);
+      streamInto(aiId, reply.text, () => {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === aiId ? { ...m, citations: reply.citations, meta: reply.meta } : m))
+        );
+      });
     });
   }
 
@@ -863,49 +819,26 @@ export default function App() {
     }
   }
 
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const uploadedDocs: Doc[] = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const newDoc: Doc = {
-        id: `d${Date.now()}-${i}`,
-        name: file.name,
-        pages: 0,
-        status: 'processing',
-        size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-        addedAt: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-        category: 'Uploaded',
-      };
-      uploadedDocs.push(newDoc);
-    }
-    setDocs((prev) => [...uploadedDocs, ...prev]);
-
-    // Upload to backend
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append('files', files[i]);
-    }
-
-    try {
-      await ingestPdfs(formData);
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const newDoc: Doc = {
+      id: `d${Date.now()}`,
+      name: file.name,
+      pages: 0,
+      status: 'processing',
+      size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+      addedAt: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+      category: 'Uploaded',
+    };
+    setDocs((prev) => [newDoc, ...prev]);
+    setTimeout(() => {
       setDocs((prev) =>
-        prev.map((d) => {
-          const uploaded = uploadedDocs.find((u) => u.id === d.id);
-          return uploaded ? { ...d, status: 'ready' as DocStatus } : d;
-        })
+        prev.map((d) =>
+          d.id === newDoc.id ? { ...d, status: 'ready', pages: Math.floor(Math.random() * 200 + 40) } : d
+        )
       );
-    } catch (err) {
-      console.error('PDF ingestion failed:', err);
-      setDocs((prev) =>
-        prev.map((d) => {
-          const uploaded = uploadedDocs.find((u) => u.id === d.id);
-          return uploaded ? { ...d, status: 'error' as DocStatus } : d;
-        })
-      );
-    }
+    }, 3000);
     e.target.value = '';
   }
 
@@ -1263,33 +1196,7 @@ export default function App() {
               >
                 {/* Mic */}
                 <button
-                  onClick={() => {
-                    if (micActive) {
-                      // Stop listening
-                      if (recognitionRef.current) recognitionRef.current.stop();
-                      setMicActive(false);
-                    } else {
-                      // Start listening via Web Speech API
-                      if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-                        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                        const recognition = new SpeechRecognition();
-                        recognition.continuous = false;
-                        recognition.interimResults = false;
-                        recognition.lang = lang === 'EN' ? 'en-US' : 'hi-IN';
-                        recognition.onresult = (event: any) => {
-                          const transcript = event.results[0][0].transcript;
-                          setInputText((prev) => prev + transcript);
-                        };
-                        recognition.onend = () => setMicActive(false);
-                        recognition.onerror = () => setMicActive(false);
-                        recognitionRef.current = recognition;
-                        recognition.start();
-                        setMicActive(true);
-                      } else {
-                        console.warn('Speech Recognition not supported in this browser.');
-                      }
-                    }
-                  }}
+                  onClick={() => setMicActive((v) => !v)}
                   className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all ${micActive ? 'mic-active' : 'hover:bg-[#eef0f4]'}`}
                   style={micActive ? { background: 'linear-gradient(135deg, #2d6a4f, #1e4d38)', boxShadow: '0 0 0 3px rgba(82,183,136,0.2)' } : { background: 'transparent' }}
                   title={micActive ? 'Stop listening' : 'Voice input'}

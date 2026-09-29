@@ -1,4 +1,5 @@
 {
+  "title": "SahayBot",
   "description": "SahayBot offers advanced legal assistance through an intuitive chatbot interface, enabling users to manage documents and receive reliable legal insights efficiently.",
   "robots": {
     "index": false

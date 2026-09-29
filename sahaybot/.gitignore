@@ -1,0 +1,9 @@
+__pycache__/
+.venv/
+node_modules/
+chroma_db/
+.env
+dist/
+build/
+.DS_Store
+/data/*.pdf

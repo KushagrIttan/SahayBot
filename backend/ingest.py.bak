@@ -1,0 +1,46 @@
+import os
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import Chroma
+from langchain_community.embeddings import SentenceTransformerEmbeddings
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_PATH = os.path.join(BASE_DIR, "../data")
+CHROMA_PATH = os.path.join(BASE_DIR, "./chroma_db")
+EMBEDDING_MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
+
+def ingest_documents():
+    documents = []
+    for filename in os.listdir(DATA_PATH):
+        if filename.endswith(".pdf"):
+            file_path = os.path.join(DATA_PATH, filename)
+            loader = PyPDFLoader(file_path)
+            documents.extend(loader.load())
+
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,
+        chunk_overlap=200,
+        length_function=len,
+        is_separator_regex=False,
+    )
+    chunks = text_splitter.split_documents(documents)
+
+    print(f"Loaded {len(documents)} documents and created {len(chunks)} chunks.")
+
+    embedding_function = SentenceTransformerEmbeddings(model_name=EMBEDDING_MODEL_NAME)
+
+    # Clear out the database first
+    if os.path.exists(CHROMA_PATH):
+        import shutil
+        shutil.rmtree(CHROMA_PATH)
+
+    db = Chroma.from_documents(
+        documents=chunks,
+        embedding=embedding_function,
+        persist_directory=CHROMA_PATH
+    )
+    db.persist()
+    print(f"Ingestion complete. Stored in {CHROMA_PATH}")
+
+if __name__ == "__main__":
+    ingest_documents()

@@ -1,0 +1,44 @@
+.message-input-container {
+  display: flex;
+  padding: 15px 20px;
+  background-color: #f0f0f0;
+  border-top: 1px solid #e0e0e0;
+  gap: 10px;
+}
+
+.message-input-container input[type='text'] {
+  flex-grow: 1;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 1em;
+  outline: none;
+}
+
+.message-input-container button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 20px;
+  background-color: #4CAF50;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.message-input-container button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.message-input-container button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.message-input-container button.listening {
+  background-color: #ff4500; /* Orange-red when listening */
+}
+
+.message-input-container button.listening:hover:not(:disabled) {
+  background-color: #cc3700;
+}

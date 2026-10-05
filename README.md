@@ -112,7 +112,7 @@ python -m unittest discover -s backend/tests -v
 python scripts/smoke_demo.py  # Real backend + Ollama, saves reviewable demo results
 ```
 
-Regression tests isolate their data and mock only embeddings. They cover PDF upload/inventory/serving, traversal prevention, malformed and scanned files, upload limits, repeated uploads, replacement, deletion, index recovery, failed replacement and no-evidence abstention. A GitHub Actions workflow runs the build and regression suite.
+Regression tests isolate their data, use deterministic embeddings and simulate selected failure cases. Live smoke tests separately exercise real embeddings and Ollama. They cover PDF upload/inventory/serving, traversal prevention, malformed and scanned files, upload limits, repeated uploads, replacement, deletion, index recovery, failed replacement and no-evidence abstention. A GitHub Actions workflow runs the build and regression suite.
 
 ## Demo and submission material
 

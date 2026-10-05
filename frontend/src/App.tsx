@@ -1,1438 +1,1411 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { queryBot, ingestPdfs } from './services/api';
+import { useEffect, useRef, useState } from "react"
+import {
+  deleteDocument,
+  documentUrl,
+  getDocuments,
+  getHealth,
+  ingestPdfs,
+  queryBot,
+} from "./services/api"
+import type { Document, Health, Reply, Source } from "./services/api"
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type DocStatus = 'ready' | 'processing' | 'error';
-
-interface Doc {
-  id: string;
-  name: string;
-  pages: number;
-  status: DocStatus;
-  size: string;
-  addedAt: string;
-  category: string;
+type Lang = "EN" | "HI"
+type View = "chat" | "finance" | "grievance" | "library"
+type Message = {
+  id: string
+  role: "user" | "ai"
+  text: string
+  reply?: Reply
+  language?: Lang
+  error?: boolean
 }
-
-interface Citation {
-  docId: string;
-  docName: string;
-  page: number;
-  snippet: string;
-  relevance?: number; // 0..1 retrieval similarity score
+interface ToolProps {
+  lang: Lang
+  ask: (question: string) => void
 }
-
-interface ResponseMeta {
-  chunks: number;
-  latencyMs: number;
-  tokens: number;
-}
-
-interface Message {
-  id: string;
-  role: 'user' | 'ai';
-  text: string;
-  timestamp: string;
-  citations?: Citation[];
-  copied?: boolean;
-  streaming?: boolean;
-  meta?: ResponseMeta;
-  feedback?: 'up' | 'down' | null;
-}
-
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-const SEED_DOCS: Doc[] = [
-  { id: 'd1', name: 'IPC_Amendment_2023.pdf', pages: 148, status: 'ready', size: '3.2 MB', addedAt: '09:14', category: 'Criminal Law' },
-  { id: 'd2', name: 'CRPC_Guidelines_V4.pdf', pages: 312, status: 'ready', size: '7.8 MB', addedAt: '09:15', category: 'Procedure' },
-  { id: 'd3', name: 'CoopSociety_Bylaws.pdf', pages: 64, status: 'processing', size: '1.1 MB', addedAt: '09:22', category: 'Civil Law' },
-  { id: 'd4', name: 'LandAcquisition_Act.pdf', pages: 210, status: 'ready', size: '5.4 MB', addedAt: '08:50', category: 'Property' },
-  { id: 'd5', name: 'RTI_Manual_2019.pdf', pages: 89, status: 'error', size: '2.0 MB', addedAt: '08:30', category: 'Administrative' },
-  { id: 'd6', name: 'Evidence_Act_Consolidated.pdf', pages: 176, status: 'ready', size: '4.1 MB', addedAt: '08:20', category: 'Criminal Law' },
-];
-
-const SEED_MESSAGES: Message[] = [
-  {
-    id: 'm1',
-    role: 'user',
-    text: 'Under Section 34 of the IPC, what constitutes common intention in a joint criminal act?',
-    timestamp: '09:28',
+const WORDS = {
+  EN: {
+    tagline: "Your cooperative companion",
+    chat: "Ask SahayBot",
+    finance: "Financial literacy",
+    grievance: "Grievance support",
+    library: "Source library",
+    new: "New conversation",
+    input: "Ask about your cooperative, a scheme or crop insurance…",
+    send: "Send",
+    welcome: "A clearer path to cooperative support.",
+    description:
+      "Understand your rights, discover services and take the next step — with evidence you can read.",
+    upload: "Upload PDF",
+    all: "All documents",
+    thinking: "Finding evidence and preparing your answer…",
+    sources: "Retrieved evidence",
+    empty: "No documents indexed yet. Upload a readable PDF.",
+    disclaimer:
+      "Guidance from reference documents, not a legal decision. Verify current notifications and your state’s adopted rules.",
+    select: "Search scope",
+    speak: "Read aloud",
+    stop: "Stop audio",
+    copy: "Copy",
+    close: "Close",
+    history:
+      "Conversation is saved in this browser. New conversation clears it.",
+    offline:
+      "Browser voice input may use your browser provider’s servers. Typed questions and local AI do not require cloud inference.",
   },
-  {
-    id: 'm2',
-    role: 'ai',
-    text: 'Section 34 of the Indian Penal Code, 1860 establishes the doctrine of **common intention**. When a criminal act is done by several persons in furtherance of a common intention of all, each of such persons is liable for that act in the same manner as if it were done by him alone.\n\n**Key elements established by courts:**\n\n1. There must be a prior meeting of minds — a pre-arranged plan, though it need not be pre-meditated for long.\n2. Participation in the criminal act is necessary; mere presence at the scene is insufficient.\n3. Common intention must exist before or during the commission of the act, not be inferred solely from the act itself.\n\nThe Supreme Court in **Mahbub Shah v. Emperor (1945)** clarified that common intention implies a pre-arranged plan and acting in concert pursuant to that plan. Proximity and opportunity may be considered, but are not conclusive.\n\nThe distinction between "common intention" (§34) and "common object" (§149) is critical — §34 requires a prior concert, while §149 attaches liability to membership of an unlawful assembly.',
-    timestamp: '09:28',
-    feedback: null,
-    meta: { chunks: 5, latencyMs: 1840, tokens: 412 },
-    citations: [
-      { docId: 'd1', docName: 'IPC_Amendment_2023.pdf', page: 47, snippet: '"When a criminal act is done by several persons in furtherance of the common intention of all, each of such persons is liable for that act in the same manner as if it were done by him alone." — Section 34, IPC 1860', relevance: 0.94 },
-      { docId: 'd6', docName: 'Evidence_Act_Consolidated.pdf', page: 88, snippet: 'Admissibility of acts done in furtherance of common intention as evidence under Section 10 of the Indian Evidence Act, 1872.', relevance: 0.81 },
+  HI: {
+    tagline: "आपकी सहकारिता का साथी",
+    chat: "सहायबॉट से पूछें",
+    finance: "वित्तीय साक्षरता",
+    grievance: "शिकायत सहायता",
+    library: "दस्तावेज़ संग्रह",
+    new: "नई बातचीत",
+    input: "सहकारी संस्था, योजना या फसल बीमा के बारे में पूछें…",
+    send: "भेजें",
+    welcome: "सहकारिता की जानकारी, अब आसान।",
+    description:
+      "अपने अधिकार समझें, सेवाएँ जानें और अगला कदम उठाएँ — मूल दस्तावेज़ों के साथ।",
+    upload: "PDF अपलोड करें",
+    all: "सभी दस्तावेज़",
+    thinking: "दस्तावेज़ों से जानकारी लेकर उत्तर तैयार किया जा रहा है…",
+    sources: "संबंधित दस्तावेज़ के अंश",
+    empty: "अभी कोई दस्तावेज़ नहीं है। टेक्स्ट वाला PDF अपलोड करें।",
+    disclaimer:
+      "यह दस्तावेज़ आधारित मार्गदर्शन है, कानूनी निर्णय नहीं। वर्तमान अधिसूचना और राज्य में लागू उपविधियाँ जाँचें।",
+    select: "खोज के दस्तावेज़",
+    speak: "उत्तर सुनें",
+    stop: "आवाज़ बंद करें",
+    copy: "कॉपी करें",
+    close: "बंद करें",
+    history: "बातचीत इस ब्राउज़र में सुरक्षित होती है। नई बातचीत इसे मिटाती है।",
+    offline:
+      "ब्राउज़र की आवाज़ पहचान सेवा ऑडियो अपने सर्वर पर भेज सकती है। टेक्स्ट और स्थानीय AI के लिए क्लाउड AI आवश्यक नहीं है।",
+  },
+}
+const PROMPTS = {
+  EN: [
+    [
+      "🌾",
+      "PACS services",
+      "What services can a PACS provide under the model bye-laws?",
     ],
-  },
-  {
-    id: 'm3',
-    role: 'user',
-    text: 'What are the procedural requirements under Section 164 CrPC for recording a statement?',
-    timestamp: '09:31',
-  },
-  {
-    id: 'm4',
-    role: 'ai',
-    text: 'Section 164 of the Code of Criminal Procedure, 1973 governs the recording of confessions and statements by a Magistrate. The procedural requirements are stringent to ensure voluntariness and evidentiary reliability.\n\n**For a confession:**\n- The Magistrate must explain to the accused that they are not bound to make a confession and that any confession may be used against them.\n- A reasonable time — typically **24 hours** — must be given between warning and recording.\n- If the Magistrate does not believe the confession is voluntary, it must not be recorded.\n- The confession must be recorded in the prescribed manner and signed by both the maker and the Magistrate.\n\n**For other statements:**\n- Any Magistrate may record statements of witnesses during investigation.\n- The statement must be read over to the maker and signed or thumb-marked.\n- Statements are admissible under Section 80 of the Indian Evidence Act as public documents.\n\n**Recent judicial position:** The Supreme Court in *Dagdu v. State of Maharashtra* (1977) held that the voluntariness of a confession is a question of fact, not law.',
-    timestamp: '09:31',
-    feedback: null,
-    meta: { chunks: 6, latencyMs: 2130, tokens: 388 },
-    citations: [
-      { docId: 'd2', docName: 'CRPC_Guidelines_V4.pdf', page: 203, snippet: 'Sec. 164(2): "The Magistrate shall, before recording any such confession, explain to the person making it that he is not bound to make a confession and that, if he does so, it may be used as evidence against him."', relevance: 0.91 },
-      { docId: 'd2', docName: 'CRPC_Guidelines_V4.pdf', page: 206, snippet: 'Where the accused refuses to sign the confession, the Magistrate shall note the refusal and the confession shall not thereby be invalidated — per amended proviso.', relevance: 0.76 },
+    ["☂", "Crop insurance", "What are the farmer premium rates under PMFBY?"],
+    [
+      "🤝",
+      "Member rights",
+      "What are the membership conditions in the PACS model bye-laws?",
     ],
-  },
-];
-
-const RETRIEVAL_STAGES = [
-  'Embedding query',
-  'Searching vector corpus',
-  'Reranking passages',
-  'Synthesizing answer',
-];
-
-const SUGGESTED_PROMPTS = [
-  'What is the limitation period for filing a civil suit under the Limitation Act?',
-  'Explain the procedure for anticipatory bail under Section 438 CrPC.',
-  'What constitutes "willful default" in cooperative society disputes?',
-  'How is compensation assessed under the Land Acquisition Act, 2013?',
-];
-
-const PREVIEW_SNIPPETS: Record<string, string[]> = {
-  'd1': [
-    '§ 34. Acts done by several persons in furtherance of common intention.—When a criminal act is done by several persons in furtherance of the common intention of all, each of such persons is liable for that act in the same manner as if it were done by him alone.',
-    '§ 35. When such an act is criminal by reason of its being done with a criminal knowledge or intention.—Whenever an act, which is criminal only by reason of its being done with a criminal knowledge or intention, is done by several persons, each of such persons who joins in the act with such knowledge or intention is liable for the act in the same manner as if the act were done by him alone with that knowledge or intention.',
+    ["📝", "Get heard", "How does grievance redressal work under PMFBY?"],
   ],
-  'd2': [
-    '164. Recording of confessions and statements.—(1) Any Metropolitan Magistrate or Judicial Magistrate may, whether or not he has jurisdiction in the case, record any confession or statement made to him in the course of an investigation under this Chapter.',
-    '(2) The Magistrate shall, before recording any such confession, explain to the person making it that he is not bound to make a confession and that, if he does so, it may be used as evidence against him.',
+  HI: [
+    [
+      "🌾",
+      "पैक्स की सेवाएँ",
+      "पैक्स की मॉडल उपविधियों के अनुसार कौन-कौन सी सेवाएँ मिल सकती हैं?",
+    ],
+    [
+      "☂",
+      "फसल बीमा",
+      "प्रधानमंत्री फसल बीमा योजना में किसान को कितना प्रीमियम देना होता है?",
+    ],
+    ["🤝", "सदस्यता", "पैक्स की मॉडल उपविधियों में सदस्य बनने की शर्तें क्या हैं?"],
+    [
+      "📝",
+      "शिकायत सहायता",
+      "प्रधानमंत्री फसल बीमा योजना में शिकायत निवारण कैसे होता है?",
+    ],
   ],
-  'd4': [
-    '§ 26. Determination of amount of compensation.—The Collector having determined the market value of the land, shall proceed to make an award under this Act in the prescribed form.',
-    '§ 28. Solatium.—In addition to the market value of the land, the Collector shall in every case award a sum of one hundred per centum over the market value, in consideration of the compulsory nature of the acquisition.',
-  ],
-  'd6': [
-    '§ 10. Things said or done by conspirator in reference to common design.—Where there is reasonable ground to believe that two or more persons have conspired together to commit an offence or an actionable wrong, anything said, done or written by any one of such persons in reference to their common intention, after the time when such intention was first entertained by any one of them, is a relevant fact as against each of the persons believed to be so conspiring.',
-    '§ 80. Presumption as to documents produced as record of evidence.—Whenever any document is produced before any Court, purporting to be a record or memorandum of the evidence, or of any part of the evidence, given by a witness in a judicial proceeding or before any officer authorised by law to take such evidence, and purporting to be signed by any Judge or Magistrate, or by any such officer as aforesaid, the Court shall presume that the document is genuine.',
-  ],
-};
-
-// ─── Icons ────────────────────────────────────────────────────────────────────
-
-function IconDoc({ color = '#64748b' }: { color?: string }) {
-  return (
-    <svg width="13" height="15" viewBox="0 0 13 15" fill="none">
-      <path d="M1.5 1.5h7l3 3V13.5a.5.5 0 0 1-.5.5H2a.5.5 0 0 1-.5-.5v-12A.5.5 0 0 1 1.5 1.5Z" stroke={color} strokeWidth="1.15" />
-      <path d="M8.5 1.5V5h3" stroke={color} strokeWidth="1.15" />
-      <path d="M3.5 7.5h6M3.5 9.5h4" stroke={color} strokeWidth="1" strokeLinecap="round" />
-    </svg>
-  );
 }
-
-function IconClose() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconCopy() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <rect x="3.5" y="3.5" width="7" height="7" rx="1" stroke="currentColor" strokeWidth="1.1" />
-      <path d="M3.5 8.5H2a.5.5 0 0 1-.5-.5V2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 .5.5v1.5" stroke="currentColor" strokeWidth="1.1" />
-    </svg>
-  );
-}
-
-function IconCheck() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <path d="M2 6l3 3 5-5" stroke="#52b788" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconSearch() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <circle cx="5" cy="5" r="3.5" stroke="currentColor" strokeWidth="1.1" />
-      <path d="M7.5 7.5L10 10" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconThumb({ down = false }: { down?: boolean }) {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transform: down ? 'rotate(180deg)' : 'none' }}>
-      <path d="M3.5 5.5v5H2a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5h1.5Z" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" />
-      <path d="M3.5 5.5 6 1a1.3 1.3 0 0 1 1.3 1.5L7 4.5h2.8a1 1 0 0 1 1 1.2l-.7 3.3a1 1 0 0 1-1 .8H3.5" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconRegen() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <path d="M10 3.5A4.2 4.2 0 1 0 10.5 7" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-      <path d="M10.5 1v2.8H7.7" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconChevronDown() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-      <path d="M3 5l3.5 3.5L10 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-// ─── Utility ──────────────────────────────────────────────────────────────────
-
-function renderMarkdown(text: string) {
-  const lines = text.split('\n');
-  const elements: React.ReactNode[] = [];
-  let listItems: string[] = [];
-
-  function flushList() {
-    if (listItems.length > 0) {
-      elements.push(
-        <ul key={`list-${elements.length}`} className="my-2 space-y-1 pl-4">
-          {listItems.map((item, i) => (
-            <li key={i} className="flex gap-2 text-[13px] leading-relaxed text-[#1a2332]">
-              <span className="mt-1.5 w-1 h-1 rounded-full bg-[#2d6a4f] shrink-0" />
-              <span dangerouslySetInnerHTML={{ __html: inlineFormat(item) }} />
-            </li>
-          ))}
-        </ul>
-      );
-      listItems = [];
-    }
+function initialMessages(): Message[] {
+  try {
+    const data = JSON.parse(localStorage.getItem("sahaybot-chat-v2") || "[]")
+    return Array.isArray(data)
+      ? data
+          .filter(
+            (m) =>
+              m &&
+              typeof m.id === "string" &&
+              ["user", "ai"].includes(m.role) &&
+              typeof m.text === "string",
+          )
+          .slice(-40)
+      : []
+  } catch {
+    return []
   }
-
-  function inlineFormat(s: string) {
-    return s
-      .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-[#0f1d2e]">$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/`(.+?)`/g, '<code class="font-mono text-[11px] bg-[#eef0f4] px-1 py-0.5 rounded text-[#2d6a4f]">$1</code>');
-  }
-
-  for (const line of lines) {
-    if (line.startsWith('- ') || line.startsWith('• ')) {
-      listItems.push(line.slice(2));
-    } else if (/^\d+\./.test(line)) {
-      listItems.push(line.replace(/^\d+\.\s*/, ''));
-    } else {
-      flushList();
-      if (line.trim() === '') {
-        elements.push(<div key={elements.length} className="h-2" />);
-      } else {
-        elements.push(
-          <p
-            key={elements.length}
-            className="text-[13px] leading-relaxed text-[#1a2332]"
-            dangerouslySetInnerHTML={{ __html: inlineFormat(line) }}
-          />
-        );
-      }
-    }
-  }
-  flushList();
-  return elements;
 }
-
-// ─── Status indicator ─────────────────────────────────────────────────────────
-
-function StatusDot({ status }: { status: DocStatus }) {
-  if (status === 'ready')
-    return <span className="w-1.5 h-1.5 rounded-full bg-[#52b788] shrink-0" title="Ready" />;
-  if (status === 'processing')
-    return <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" title="Processing" />;
-  return <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" title="Error" />;
-}
-
-// ─── Document Preview Panel ───────────────────────────────────────────────────
-
-function DocPreviewPanel({
-  citation,
-  doc,
-  onClose,
-}: {
-  citation: Citation | null;
-  doc: Doc | undefined;
-  onClose: () => void;
-}) {
-  const snippets = citation ? (PREVIEW_SNIPPETS[citation.docId] ?? []) : [];
-  const focusSnippet = citation?.snippet ?? '';
-
-  return (
-    <aside
-      className="shrink-0 flex flex-col overflow-hidden transition-all duration-250"
-      style={{
-        width: citation ? 340 : 0,
-        borderLeft: '1px solid #dde2ea',
-        background: '#ffffff',
-        boxShadow: citation ? '-4px 0 20px rgba(0,0,0,0.05)' : 'none',
-      }}
-    >
-      {citation && (
-        <div className="flex flex-col h-full" style={{ width: 340 }}>
-          {/* Panel header */}
-          <div
-            className="shrink-0 flex items-center justify-between px-4 py-3"
-            style={{ borderBottom: '1px solid #eef0f4', background: '#f7f8fa' }}
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="text-[#2d6a4f]">
-                <IconDoc color="#2d6a4f" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold text-[#1a2332] truncate font-mono">{citation.docName}</p>
-                <p className="text-[10px] text-[#94a3b8] mt-0.5">
-                  {doc?.pages ?? '—'} pages · {doc?.size ?? '—'}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="w-6 h-6 rounded flex items-center justify-center text-[#94a3b8] hover:text-[#334155] hover:bg-[#eef0f4] transition-colors ml-2 shrink-0"
-            >
-              <IconClose />
-            </button>
-          </div>
-
-          {/* Page badge */}
-          <div
-            className="shrink-0 flex items-center gap-2 px-4 py-2.5"
-            style={{ borderBottom: '1px solid #eef0f4' }}
-          >
-            <span
-              className="text-[10px] font-semibold px-2 py-1 rounded"
-              style={{ background: '#2d6a4f', color: 'white' }}
-            >
-              Page {citation.page}
-            </span>
-            <span className="text-[10px] text-[#94a3b8]">Citation anchor</span>
-          </div>
-
-          {/* Highlighted excerpt */}
-          <div className="px-4 py-3 shrink-0" style={{ borderBottom: '1px solid #eef0f4' }}>
-            <p className="text-[9px] uppercase tracking-widest text-[#94a3b8] font-semibold mb-2">Cited Passage</p>
-            <blockquote
-              className="text-[12px] leading-relaxed italic text-[#334155] pl-3"
-              style={{ borderLeft: '2px solid #2d6a4f' }}
-            >
-              "{focusSnippet}"
-            </blockquote>
-          </div>
-
-          {/* Surrounding text */}
-          <div className="flex-1 scrollable px-4 py-3">
-            <p className="text-[9px] uppercase tracking-widest text-[#94a3b8] font-semibold mb-3">Document Context</p>
-            {snippets.map((s, i) => (
-              <div
-                key={i}
-                className="mb-3 p-3 rounded text-[11.5px] leading-relaxed text-[#475569]"
-                style={{ background: '#f7f8fa', border: '1px solid #eef0f4' }}
-              >
-                {s}
-              </div>
-            ))}
-            {snippets.length === 0 && (
-              <p className="text-[11px] text-[#94a3b8] italic">Full document context unavailable in preview.</p>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div
-            className="shrink-0 px-4 py-3 flex items-center justify-between"
-            style={{ borderTop: '1px solid #eef0f4' }}
-          >
-            <span className="text-[10px] text-[#94a3b8]">Indexed via RAG pipeline</span>
-            <button
-              className="text-[10px] font-medium px-2.5 py-1.5 rounded transition-colors"
-              style={{ background: '#f0fdf4', color: '#2d6a4f', border: '1px solid #bbf7d0' }}
-            >
-              Open Full Doc
-            </button>
-          </div>
-        </div>
-      )}
-    </aside>
-  );
-}
-
-// ─── Citation card ────────────────────────────────────────────────────────────
-
-function CitationCard({ citation, onOpen }: { citation: Citation; onOpen: (c: Citation) => void }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      className="text-left w-full rounded overflow-hidden transition-all"
-      style={{
-        border: `1px solid ${hovered ? '#2d6a4f' : '#dde2ea'}`,
-        background: hovered ? '#f0fdf4' : '#f7f8fa',
-        boxShadow: hovered ? '0 0 0 3px rgba(45,106,79,0.08)' : 'none',
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onClick={() => onOpen(citation)}
-    >
-      <div className="flex items-center gap-2 px-3 py-2">
-        <span className="text-[#2d6a4f]">
-          <IconDoc color="#2d6a4f" />
-        </span>
-        <span className="text-[11px] font-medium text-[#334155] truncate flex-1 font-mono">
-          {citation.docName}
-        </span>
-        {citation.relevance != null && (
-          <span className="flex items-center gap-1 shrink-0" title={`Retrieval similarity ${(citation.relevance * 100).toFixed(0)}%`}>
-            <span className="w-8 h-1 rounded-full overflow-hidden" style={{ background: '#dde2ea' }}>
-              <span
-                className="block h-full rel-fill rounded-full"
-                style={{
-                  width: `${citation.relevance * 100}%`,
-                  background: citation.relevance >= 0.85 ? '#2d6a4f' : citation.relevance >= 0.7 ? '#40916c' : '#94a3b8',
-                }}
-              />
-            </span>
-            <span className="text-[9px] font-mono tabular-nums text-[#64748b]">
-              {(citation.relevance * 100).toFixed(0)}%
-            </span>
-          </span>
-        )}
-        <span
-          className="text-[9px] font-semibold shrink-0 px-1.5 py-0.5 rounded"
-          style={{ background: '#2d6a4f', color: 'white' }}
-        >
-          p. {citation.page}
-        </span>
-      </div>
-      <div
-        className="overflow-hidden transition-all duration-200"
-        style={{ maxHeight: hovered ? '100px' : '0px', opacity: hovered ? 1 : 0 }}
-      >
-        <div className="px-3 pb-2.5" style={{ borderTop: '1px solid #dde2ea' }}>
-          <p className="text-[11px] leading-relaxed text-[#475569] italic pt-2">
-            "{citation.snippet.length > 140 ? citation.snippet.slice(0, 140) + '…' : citation.snippet}"
-          </p>
-          <span className="text-[9px] font-medium text-[#2d6a4f] mt-1 block">Click to view in document →</span>
-        </div>
-      </div>
-    </button>
-  );
-}
-
-// ─── Message bubbles ──────────────────────────────────────────────────────────
-
-function UserBubble({ msg, onCopy }: { msg: Message; onCopy: (id: string) => void }) {
-  return (
-    <div className="flex justify-end gap-2 group msg-in">
-      <div className="flex items-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity self-end mb-1">
+function inline(text: string, sources: Source[], open: (s: Source) => void) {
+  return text.split(/(\*\*[^*]+\*\*|\[\d+\])/g).map((part, i) => {
+    if (part.startsWith("**"))
+      return <strong key={i}>{part.slice(2, -2)}</strong>
+    const match = /^\[(\d+)\]$/.exec(part)
+    const source = match && sources.find((s) => s.number === Number(match[1]))
+    if (source)
+      return (
         <button
-          onClick={() => onCopy(msg.id)}
-          className="w-5 h-5 rounded flex items-center justify-center text-[#94a3b8] hover:text-[#334155] hover:bg-[#eef0f4] transition-colors"
+          key={i}
+          className="inline-citation"
+          onClick={() => open(source)}
+          aria-label={`Source ${source.number}, page ${source.page}`}
         >
-          {msg.copied ? <IconCheck /> : <IconCopy />}
+          {part}
         </button>
-      </div>
-      <div className="max-w-[58%]">
-        <div
-          className="px-4 py-3 rounded-xl text-[13px] leading-relaxed text-white"
-          style={{
-            background: 'linear-gradient(135deg, #1a3a5c 0%, #162438 100%)',
-            border: '1px solid #264060',
-            boxShadow: '0 2px 8px rgba(11,22,38,0.2)',
-          }}
-        >
-          {msg.text}
-        </div>
-        <p className="text-[10px] text-right mt-1 text-[#c4cdd8]">{msg.timestamp}</p>
-      </div>
-      <div
-        className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center self-end text-[10px] font-semibold"
-        style={{ background: '#264060', color: '#94a3b8', border: '1px solid #1e3048' }}
-      >
-        RS
-      </div>
-    </div>
-  );
+      )
+    return part
+  })
 }
-
-function AiBubble({
-  msg,
-  onCopy,
-  onCitationOpen,
-  onFeedback,
-  onRegen,
+function Answer({
+  text,
+  sources,
+  open,
 }: {
-  msg: Message;
-  onCopy: (id: string) => void;
-  onCitationOpen: (c: Citation) => void;
-  onFeedback: (id: string, v: 'up' | 'down') => void;
-  onRegen: (id: string) => void;
+  text: string
+  sources: Source[]
+  open: (s: Source) => void
 }) {
   return (
-    <div className="flex gap-3 items-start group msg-in">
-      <div
-        className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center mt-0.5"
-        style={{ background: 'linear-gradient(135deg, #2d6a4f 0%, #1e4d38 100%)', boxShadow: '0 2px 6px rgba(45,106,79,0.3)' }}
-      >
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-          <path d="M6.5 1.5 L8.5 5H11L9 7.5l.8 3-3.3-2-3.3 2L4 7.5 2 5h2.5z" stroke="white" strokeWidth="1" fill="none" strokeLinejoin="round" />
-        </svg>
+    <div className="answer-text">
+      {text
+        .split("\n")
+        .map((line, i) =>
+          line.trim() ? (
+            <p key={i}>{inline(line, sources, open)}</p>
+          ) : (
+            <div className="paragraph-gap" key={i} />
+          ),
+        )}
+    </div>
+  )
+}
+function localizeCell(cell: string, lang: Lang) {
+  if (lang === "EN") return cell
+  const terms: [string, string][] = [
+    [
+      "Maximum Premium Rate payable by farmer (% of Sum Insured)*",
+      "किसान का अधिकतम प्रीमियम (बीमित राशि का प्रतिशत)*",
+    ],
+    [
+      "All Food grain and Oilseeds crops (all Cereals, Millets, Pulses and Oilseeds crops)",
+      "सभी खाद्यान्न और तिलहन फसलें (अनाज, मोटे अनाज, दालें और तिलहन)",
+    ],
+    [
+      "Annual Commercial/ Annual Horticultural crops",
+      "वार्षिक वाणिज्यिक / वार्षिक बागवानी फसलें",
+    ],
+    [
+      "Perennial horticultural / commercial crops (pilot basis)",
+      "बहुवर्षीय बागवानी / वाणिज्यिक फसलें (पायलट आधार पर)",
+    ],
+    [
+      "of SI or Actuarial rate, whichever is less",
+      "बीमित राशि या बीमांकिक दर, जो भी कम हो",
+    ],
+    ["Kharif and Rabi", "खरीफ और रबी"],
+    ["Kharif", "खरीफ"],
+    ["Rabi", "रबी"],
+    ["Season", "मौसम"],
+    ["Crops", "फसलें"],
+  ]
+  return terms.reduce(
+    (value, [english, hindi]) => value.replace(english, hindi),
+    cell,
+  )
+}
+function SourceTable({
+  table,
+  lang,
+}: {
+  table: NonNullable<Reply["table"]>
+  lang: Lang
+}) {
+  return (
+    <div className="document-table">
+      <div className="table-caption">
+        {lang === "HI"
+          ? "PDF से निकाली गई तालिका"
+          : "Table extracted from the PDF"}{" "}
+        · {table.pages.join("–")}
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-[10px] font-semibold text-[#2d6a4f] uppercase tracking-wider">SahayBot</span>
-          <span className="text-[10px] text-[#c4cdd8]">{msg.timestamp}</span>
-        </div>
-        <div
-          className="px-4 py-3.5 rounded-xl text-[13px] leading-relaxed"
-          style={{
-            background: '#ffffff',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04)',
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              {table.headers.map((cell, i) => (
+                <th key={i} title={cell}>
+                  {localizeCell(cell, lang)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {table.rows.map((row, i) => (
+              <tr key={i}>
+                {row.map((cell, j) => (
+                  <td key={j} title={cell}>
+                    {localizeCell(cell, lang)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="small muted">
+        {lang === "HI"
+          ? "SI = बीमित राशि। मूल अंग्रेज़ी शब्द और अगला पृष्ठ स्रोत PDF में देखें।"
+          : "SI = Sum Insured. See the source PDF for the original wording, continuation and footnotes."}
+      </p>
+    </div>
+  )
+}
+const rupees = (n: number) =>
+  n.toLocaleString("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  })
+function Finance({ lang, ask }: ToolProps) {
+  const [principal, setPrincipal] = useState(100000)
+  const [rate, setRate] = useState(10)
+  const [months, setMonths] = useState(24)
+  const monthly = rate / 1200
+  const emi =
+    monthly === 0
+      ? principal / months
+      : (principal * monthly) / (1 - Math.pow(1 + monthly, -months))
+  const total = emi * months
+  const hi = lang === "HI"
+  return (
+    <div className="tool-page">
+      <span className="eyebrow">
+        {hi ? "समझें, फिर निर्णय लें" : "UNDERSTAND BEFORE YOU BORROW"}
+      </span>
+      <h1>{hi ? "आपके पैसे, समझदारी से।" : "Make sense of your money."}</h1>
+      <p className="intro">
+        {hi
+          ? "ऋण की मासिक किस्त और ब्याज समझें। यह शैक्षणिक अनुमान है, बैंक का प्रस्ताव नहीं।"
+          : "Understand your monthly instalment and the cost of borrowing. An educational estimate, not a bank offer."}
+      </p>
+      <div className="tool-grid">
+        <section className="panel">
+          <h2>{hi ? "ऋण कैलकुलेटर" : "Loan repayment calculator"}</h2>
+          <label>
+            {hi ? "ऋण राशि (₹)" : "Loan amount (₹)"}
+            <input
+              type="number"
+              min="1"
+              max="100000000"
+              value={principal}
+              onChange={(e) =>
+                setPrincipal(
+                  Math.min(100000000, Math.max(1, Number(e.target.value))),
+                )
+              }
+            />
+          </label>
+          <label>
+            {hi ? "वार्षिक ब्याज दर (%)" : "Annual interest (%)"}
+            <input
+              type="number"
+              min="0"
+              max="60"
+              step="0.1"
+              value={rate}
+              onChange={(e) =>
+                setRate(Math.min(60, Math.max(0, Number(e.target.value))))
+              }
+            />
+          </label>
+          <label>
+            {hi ? "अवधि (महीने)" : "Term (months)"}
+            <input
+              type="number"
+              min="1"
+              max="360"
+              value={months}
+              onChange={(e) =>
+                setMonths(
+                  Math.min(
+                    360,
+                    Math.max(1, Math.round(Number(e.target.value))),
+                  ),
+                )
+              }
+            />
+          </label>
+          <p className="muted small">
+            {hi
+              ? "घटते शेष पर मासिक किस्त। शुल्क, दंड और बीमा शामिल नहीं हैं।"
+              : "Monthly instalments on a reducing balance. Excludes fees, penalties and insurance."}
+          </p>
+        </section>
+        <section className="panel finance-result">
+          <span>
+            {hi ? "अनुमानित मासिक किस्त" : "Estimated monthly instalment"}
+          </span>
+          <div className="money">{rupees(emi)}</div>
+          <div className="money-line">
+            <span>{hi ? "मूल राशि" : "Principal"}</span>
+            <strong>{rupees(principal)}</strong>
+          </div>
+          <div className="money-line">
+            <span>{hi ? "कुल ब्याज" : "Total interest"}</span>
+            <strong>{rupees(total - principal)}</strong>
+          </div>
+          <div className="money-line">
+            <span>{hi ? "कुल भुगतान" : "Total repayment"}</span>
+            <strong>{rupees(total)}</strong>
+          </div>
+          <div className="cost-bar">
+            <div style={{ width: `${(principal / total) * 100}%` }} />
+          </div>
+          <p className="small">
+            {hi
+              ? "बैंक से लिखित ब्याज दर, शुल्क और किस्त विवरण माँगें।"
+              : "Ask the lender for the written rate, all charges and repayment schedule."}
+          </p>
+        </section>
+      </div>
+      <section className="panel">
+        <h2>
+          {hi
+            ? "दस्तावेज़ों से वित्तीय जानकारी"
+            : "Learn from the reference documents"}
+        </h2>
+        <p className="muted">
+          {hi
+            ? "बचत, जिम्मेदार ऋण और ग्राहक सुरक्षा के बारे में RBI दस्तावेज़ से पूछें।"
+            : "Ask the RBI reference about financial literacy, responsible borrowing and consumer protection."}
+        </p>
+        <button
+          className="primary"
+          onClick={() =>
+            ask(
+              hi
+                ? "वित्तीय साक्षरता और ग्राहक सुरक्षा क्यों महत्वपूर्ण हैं?"
+                : "Why are financial literacy and consumer protection important?",
+            )
+          }
+        >
+          {hi ? "सहायबॉट से पूछें" : "Ask SahayBot"}
+        </button>
+      </section>
+    </div>
+  )
+}
+function downloadText(name: string, text: string) {
+  const url = URL.createObjectURL(
+    new Blob([text], { type: "text/plain;charset=utf-8" }),
+  )
+  const link = document.createElement("a")
+  link.href = url
+  link.download = name
+  link.click()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+function Grievance({ lang, ask }: ToolProps) {
+  const hi = lang === "HI"
+  const [name, setName] = useState("")
+  const [society, setSociety] = useState("")
+  const [place, setPlace] = useState("")
+  const [issue, setIssue] = useState("")
+  const [relief, setRelief] = useState("")
+  const [draft, setDraft] = useState("")
+  function build() {
+    const date = new Date().toLocaleDateString(hi ? "hi-IN" : "en-IN")
+    setDraft(
+      hi
+        ? `शिकायत का मसौदा — प्रेषण से पहले संपादित और सत्यापित करें\n\nदिनांक: ${date}\nप्रति: संबंधित सहकारी संस्था / सक्षम प्राधिकरण\nविषय: ${society} से संबंधित शिकायत\n\nमेरा नाम ${name} है और मैं ${place} से हूँ।\n\nसमस्या का विवरण:\n${issue}\n\nमेरा अनुरोध:\n${relief || "कृपया शिकायत की जाँच करें और लिखित उत्तर दें।"}\n\nसंलग्नक: सदस्यता विवरण, रसीदें, पत्राचार और संबंधित दस्तावेज़ (उपलब्ध होने पर)।\n\nकृपया प्राप्ति की पुष्टि करें और लागू प्रक्रिया के अनुसार आगे की कार्रवाई बताएँ।\n\nभवदीय,\n${name}\n\nयह केवल मसौदा है। कोई शिकायत जमा नहीं हुई है। सही प्राधिकरण राज्य, संस्था के प्रकार और समस्या पर निर्भर करता है।`
+        : `GRIEVANCE DRAFT — edit and verify before sending\n\nDate: ${date}\nTo: The concerned cooperative / competent authority\nSubject: Grievance concerning ${society}\n\nMy name is ${name}, from ${place}.\n\nDescription of the issue:\n${issue}\n\nRequested resolution:\n${relief || "Please examine this grievance and provide a written response."}\n\nAttachments: Membership details, receipts, correspondence and relevant records, where available.\n\nPlease acknowledge receipt and explain the next steps under the applicable procedure.\n\nYours faithfully,\n${name}\n\nThis is a draft only. No grievance has been submitted. The competent authority depends on the state, society type and issue.`,
+    )
+  }
+  return (
+    <div className="tool-page">
+      <span className="eyebrow">
+        {hi ? "अपनी बात रखें" : "TAKE THE NEXT STEP"}
+      </span>
+      <h1>{hi ? "अपनी शिकायत स्पष्ट लिखें।" : "Make your concern heard."}</h1>
+      <p className="intro">
+        {hi
+          ? "शिकायत का संपादन योग्य मसौदा बनाएँ। यह सेवा किसी पोर्टल पर शिकायत जमा नहीं करती।"
+          : "Prepare an editable complaint draft. This tool does not submit a complaint to any authority."}
+      </p>
+      <div className="tool-grid">
+        <form
+          className="panel"
+          onSubmit={(e) => {
+            e.preventDefault()
+            build()
           }}
         >
-          <div className="space-y-1">
-            {renderMarkdown(msg.text)}
-            {msg.streaming && <span className="stream-caret" />}
-          </div>
-          {!msg.streaming && msg.meta && (
-            <div
-              className="flex items-center gap-3 mt-3 pt-2.5 text-[9.5px] text-[#94a3b8]"
-              style={{ borderTop: '1px solid #f1f3f6' }}
-            >
-              <span className="flex items-center gap-1">
-                <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-                  <path d="M5 0.5 2 5h2l-.5 3.5L7 4H5z" fill="#52b788" />
-                </svg>
-                {(msg.meta.latencyMs / 1000).toFixed(2)}s
-              </span>
-              <span className="text-[#dde2ea]">·</span>
-              <span className="font-mono">{msg.meta.chunks} chunks</span>
-              <span className="text-[#dde2ea]">·</span>
-              <span className="font-mono">{msg.meta.tokens} tokens</span>
+          <label>
+            {hi ? "आपका नाम" : "Your name"}
+            <input
+              required
+              maxLength={120}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </label>
+          <label>
+            {hi ? "संस्था / पैक्स का नाम" : "Cooperative / PACS name"}
+            <input
+              required
+              maxLength={200}
+              value={society}
+              onChange={(e) => setSociety(e.target.value)}
+            />
+          </label>
+          <label>
+            {hi ? "जिला और राज्य" : "District and state"}
+            <input
+              required
+              maxLength={200}
+              value={place}
+              onChange={(e) => setPlace(e.target.value)}
+            />
+          </label>
+          <label>
+            {hi
+              ? "क्या हुआ? तारीख और तथ्य बताएँ।"
+              : "What happened? Include dates and facts."}
+            <textarea
+              required
+              maxLength={4000}
+              rows={4}
+              value={issue}
+              onChange={(e) => setIssue(e.target.value)}
+            />
+          </label>
+          <label>
+            {hi ? "आप क्या समाधान चाहते हैं?" : "What resolution do you seek?"}
+            <textarea
+              maxLength={1000}
+              rows={2}
+              value={relief}
+              onChange={(e) => setRelief(e.target.value)}
+            />
+          </label>
+          <p className="small muted">
+            {hi
+              ? "आधार, बैंक खाता संख्या, PIN या OTP न लिखें। ये फ़ील्ड सर्वर पर नहीं भेजे जाते।"
+              : "Do not include Aadhaar, account numbers, PINs or OTPs. These form fields stay in this page and are not sent to the server."}
+          </p>
+          <button className="primary" type="submit">
+            {hi ? "मसौदा बनाएँ" : "Prepare draft"}
+          </button>
+        </form>
+        <section className="panel">
+          <h2>{hi ? "आपका मसौदा" : "Your draft"}</h2>
+          {draft ? (
+            <>
+              <textarea
+                className="draft"
+                aria-label="Editable grievance draft"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                rows={18}
+              />
+              <button
+                className="primary"
+                onClick={() =>
+                  downloadText("SahayBot-grievance-draft.txt", draft)
+                }
+              >
+                {hi ? "मसौदा डाउनलोड करें" : "Download draft"}
+              </button>
+            </>
+          ) : (
+            <div className="draft-empty">
+              <span>📝</span>
+              <p>
+                {hi
+                  ? "विवरण भरें। मसौदा यहाँ दिखेगा।"
+                  : "Fill in the details. Your editable draft will appear here."}
+              </p>
             </div>
           )}
-        </div>
-
-        {!msg.streaming && msg.citations && msg.citations.length > 0 && (
-          <div className="mt-2.5 flex flex-col gap-1.5">
-            <div className="flex items-center gap-2">
-              <p className="text-[9px] uppercase tracking-widest text-[#94a3b8] font-semibold">
-                Sources
-              </p>
-              <span
-                className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
-                style={{ background: '#f0fdf4', color: '#2d6a4f', border: '1px solid #bbf7d0' }}
-              >
-                {msg.citations.length}
-              </span>
-            </div>
-            {msg.citations.map((c, i) => (
-              <CitationCard key={i} citation={c} onOpen={onCitationOpen} />
-            ))}
-          </div>
-        )}
-
-        {!msg.streaming && (
-          <div className="mt-1.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => onCopy(msg.id)}
-              className="flex items-center gap-1 text-[10px] text-[#94a3b8] hover:text-[#334155] px-1.5 py-0.5 rounded hover:bg-[#eef0f4] transition-colors"
-            >
-              {msg.copied ? <IconCheck /> : <IconCopy />}
-              {msg.copied ? 'Copied' : 'Copy'}
-            </button>
-            <span className="w-px h-3 bg-[#eef0f4] mx-0.5" />
-            <button
-              onClick={() => onFeedback(msg.id, 'up')}
-              className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[#eef0f4]"
-              style={{ color: msg.feedback === 'up' ? '#2d6a4f' : '#94a3b8' }}
-              title="Helpful"
-            >
-              <IconThumb />
-            </button>
-            <button
-              onClick={() => onFeedback(msg.id, 'down')}
-              className="w-6 h-6 rounded flex items-center justify-center transition-colors hover:bg-[#eef0f4]"
-              style={{ color: msg.feedback === 'down' ? '#b91c1c' : '#94a3b8' }}
-              title="Not helpful"
-            >
-              <IconThumb down />
-            </button>
-            <span className="w-px h-3 bg-[#eef0f4] mx-0.5" />
-            <button
-              onClick={() => onRegen(msg.id)}
-              className="flex items-center gap-1 text-[10px] text-[#94a3b8] hover:text-[#334155] px-1.5 py-0.5 rounded hover:bg-[#eef0f4] transition-colors"
-              title="Regenerate response"
-            >
-              <IconRegen />
-              Regenerate
-            </button>
-            {msg.feedback && (
-              <span className="text-[9px] text-[#94a3b8] ml-1 italic">Feedback recorded</span>
-            )}
-          </div>
-        )}
+        </section>
       </div>
+      <section className="panel">
+        <h2>{hi ? "सही प्रक्रिया पहचानें" : "Find the applicable process"}</h2>
+        <p className="muted">
+          {hi
+            ? "राज्य और बहु-राज्य सहकारी संस्थाओं की प्रक्रिया अलग हो सकती है। फसल बीमा की शिकायत के लिए PMFBY दस्तावेज़ देखें।"
+            : "State and multi-state cooperatives may have different procedures. For crop insurance disputes, consult the PMFBY grievance provisions."}
+        </p>
+        <div className="button-row">
+          <button
+            className="secondary"
+            onClick={() =>
+              ask(
+                hi
+                  ? "PMFBY में शिकायत निवारण की प्रक्रिया क्या है?"
+                  : "What is the grievance redressal mechanism under PMFBY?",
+              )
+            }
+          >
+            {hi ? "PMFBY प्रक्रिया पूछें" : "Ask about PMFBY grievances"}
+          </button>
+          <a
+            className="text-link"
+            href="https://pgportal.gov.in/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            CPGRAMS ↗
+          </a>
+          <a
+            className="text-link"
+            href="https://crcs.gov.in/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {hi ? "केंद्रीय रजिस्ट्रार ↗" : "Central Registrar ↗"}
+          </a>
+        </div>
+        <p className="small muted">
+          {hi
+            ? "ये बाहरी पोर्टल हैं। संबंधित विभाग और प्राधिकरण की पुष्टि करके ही शिकायत भेजें।"
+            : "External portals. Confirm the relevant department and competent authority before submitting."}
+        </p>
+      </section>
     </div>
-  );
+  )
 }
-
-function TypingIndicator({ stage }: { stage: number }) {
-  return (
-    <div className="flex gap-3 items-start msg-in">
-      <div
-        className="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center"
-        style={{ background: 'linear-gradient(135deg, #2d6a4f 0%, #1e4d38 100%)', boxShadow: '0 2px 6px rgba(45,106,79,0.3)' }}
-      >
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-          <path d="M6.5 1.5 L8.5 5H11L9 7.5l.8 3-3.3-2-3.3 2L4 7.5 2 5h2.5z" stroke="white" strokeWidth="1" fill="none" strokeLinejoin="round" />
-        </svg>
-      </div>
-      <div>
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-[10px] font-semibold text-[#2d6a4f] uppercase tracking-wider">SahayBot</span>
-          <span className="text-[10px] text-[#c4cdd8]">RAG pipeline</span>
-        </div>
-        <div
-          className="px-4 py-3 rounded-xl"
-          style={{ background: '#ffffff', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
-        >
-          <div className="flex flex-col gap-1.5">
-            {RETRIEVAL_STAGES.map((label, i) => {
-              const done = i < stage;
-              const active = i === stage;
-              return (
-                <div key={label} className="flex items-center gap-2">
-                  <span className="w-3.5 h-3.5 flex items-center justify-center shrink-0">
-                    {done ? (
-                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 6l3 3 5-5" stroke="#52b788" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    ) : active ? (
-                      <span className="w-2.5 h-2.5 rounded-full border-[1.5px] border-[#2d6a4f] border-t-transparent animate-spin" />
-                    ) : (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#dde2ea]" />
-                    )}
-                  </span>
-                  <span
-                    className={`text-[11px] ${active ? 'stage-active font-medium' : done ? 'text-[#475569]' : 'text-[#c4cdd8]'}`}
-                  >
-                    {label}
-                    {active && (
-                      <span className="inline-flex gap-0.5 ml-1 align-middle">
-                        <span className="typing-dot inline-block w-1 h-1 rounded-full bg-[#94a3b8]" />
-                        <span className="typing-dot inline-block w-1 h-1 rounded-full bg-[#94a3b8]" />
-                        <span className="typing-dot inline-block w-1 h-1 rounded-full bg-[#94a3b8]" />
-                      </span>
-                    )}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Main App ─────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [docs, setDocs] = useState<Doc[]>(SEED_DOCS);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [activeDoc, setActiveDoc] = useState<string | null>(null);
-  const [inputText, setInputText] = useState('');
-  const [lang, setLang] = useState<'EN' | 'HI'>('EN');
-  const [micActive, setMicActive] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const recognitionRef = useRef<any>(null);
-  const [retrievalStage, setRetrievalStage] = useState(0);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCitation, setActiveCitation] = useState<Citation | null>(null);
-  const [showScrollBtn, setShowScrollBtn] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const chatEndRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const autoScroll = useRef(true);
-
+  const [lang, setLang] = useState<Lang>(() => { try { return localStorage.getItem("sahaybot-language") === "HI" ? "HI" : "EN"; } catch { return "EN"; } })
+  const w = WORDS[lang]
+  const [view, setView] = useState<View>("chat")
+  const [menu, setMenu] = useState(false)
+  const [docs, setDocs] = useState<Document[]>([])
+  const [health, setHealth] = useState<Health | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [messages, setMessages] = useState<Message[]>(initialMessages)
+  const [input, setInput] = useState("")
+  const [busy, setBusy] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [notice, setNotice] = useState("")
+  const [scope, setScope] = useState("")
+  const [search, setSearch] = useState("")
+  const [preview, setPreview] = useState<Source | null>(null)
+  const [listening, setListening] = useState(false)
+  const [speaking, setSpeaking] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const bottom = useRef<HTMLDivElement>(null)
+  const abort = useRef<AbortController | null>(null)
+  const recognition = useRef<any>(null)
+  useEffect(() => { document.documentElement.lang = lang === "HI" ? "hi" : "en"; try { localStorage.setItem("sahaybot-language", lang); } catch {} }, [lang]);
   useEffect(() => {
-    if (autoScroll.current) chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
-
-  function handleScroll() {
-    const el = scrollRef.current;
-    if (!el) return;
-    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-    autoScroll.current = nearBottom;
-    setShowScrollBtn(!nearBottom);
-  }
-
-  function scrollToBottom() {
-    autoScroll.current = true;
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }
-
-  const handleFeedback = useCallback((id: string, v: 'up' | 'down') => {
-    setMessages((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, feedback: m.feedback === v ? null : v } : m))
-    );
-  }, []);
-
-  // Stream text into a message id character-by-character
-  function streamInto(id: string, full: string, done: () => void) {
-    let i = 0;
-    const step = Math.max(2, Math.round(full.length / 90));
-    const tick = () => {
-      i = Math.min(full.length, i + step);
-      setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, text: full.slice(0, i) } : m)));
-      if (i < full.length) {
-        setTimeout(tick, 18);
-      } else {
-        setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, streaming: false } : m)));
-        done();
-      }
-    };
-    tick();
-  }
-
-  // Advance through retrieval stages, then invoke callback
-  function runPipeline(after: () => void) {
-    setIsTyping(true);
-    setRetrievalStage(0);
-    let s = 0;
-    const advance = () => {
-      s += 1;
-      if (s < RETRIEVAL_STAGES.length) {
-        setRetrievalStage(s);
-        setTimeout(advance, 520 + Math.random() * 260);
-      } else {
-        setIsTyping(false);
-        after();
-      }
-    };
-    setTimeout(advance, 520 + Math.random() * 260);
-  }
-
-  // Query the real backend API
-  async function fetchReply(question: string): Promise<{ text: string; citations: Citation[]; meta: ResponseMeta }> {
-    const startTime = Date.now();
-
-    // --- HARDCODED DEMO RESPONSES ---
-    if (question.trim() === 'What is the limitation period for filing a civil suit under the Limitation Act?') {
-      return {
-        text: 'Under the Limitation Act, 1963, the limitation period for filing a civil suit varies based on the nature of the suit. Generally, for breach of contract or recovery of money, it is **3 years** from the date the cause of action arises. For suits relating to immovable property, the period is typically **12 years**.',
-        citations: [
-          { docId: 'd4', docName: 'LandAcquisition_Act.pdf', page: 45, snippet: 'While this Act deals with acquisition, civil disputes over compensation may be subject to the general limitation period of 3 years under the Limitation Act.', relevance: 0.88 },
-          { docId: 'd3', docName: 'CoopSociety_Bylaws.pdf', page: 12, snippet: 'Any civil suit filed against the society for monetary claims must adhere to the 3-year limitation period.', relevance: 0.75 }
-        ],
-        meta: { chunks: 2, latencyMs: 450, tokens: 68 }
-      };
-    }
-    
-    if (question.trim() === 'Explain the procedure for anticipatory bail under Section 438 CrPC.') {
-      return {
-        text: 'Under **Section 438 CrPC**, a person anticipating arrest for a non-bailable offence may apply to the High Court or Court of Session for anticipatory bail.\n\n**Procedure & Factors:**\n1. **Application:** Filed before the High Court or Sessions Court.\n2. **Considerations:** The court considers the gravity of the accusation, the applicant\'s antecedents (prior record), and the likelihood of them fleeing from justice.\n3. **Conditions:** If granted, the court may impose conditions such as being available for interrogation, not tampering with evidence, and not leaving the country without permission.',
-        citations: [
-          { docId: 'd2', docName: 'CRPC_Guidelines_V4.pdf', page: 245, snippet: '§ 438. Direction for grant of bail to person apprehending arrest.—(1) Where any person has reason to believe that he may be arrested on accusation of having committed a non-bailable offence, he may apply to the High Court or the Court of Session for a direction under this section...', relevance: 0.95 }
-        ],
-        meta: { chunks: 1, latencyMs: 380, tokens: 105 }
-      };
-    }
-
-    if (question.trim() === 'What constitutes "willful default" in cooperative society disputes?') {
-      return {
-        text: 'In cooperative society disputes, **"willful default"** generally refers to a deliberate or intentional failure to meet financial obligations or comply with the society\'s bylaws, despite having the capacity to do so.\n\nIt implies a conscious refusal rather than an inability to pay due to unforeseen circumstances.',
-        citations: [
-          { docId: 'd3', docName: 'CoopSociety_Bylaws.pdf', page: 34, snippet: 'A member shall be deemed a "willful defaulter" if they fail to clear their dues for three consecutive quarters despite possessing the financial means, as determined by the Managing Committee.', relevance: 0.91 }
-        ],
-        meta: { chunks: 1, latencyMs: 410, tokens: 55 }
-      };
-    }
-    // --- END HARDCODED DEMO RESPONSES ---
-
-    const response = await queryBot(question);
-    const latencyMs = Date.now() - startTime;
-    const answer: string = response.answer || 'I could not generate an answer.';
-    const rawSources = response.sources || [];
-    const citations: Citation[] = rawSources.map((src: any, idx: number) => {
-      let docName = src.file ? src.file.split('/').pop() : 'Unknown';
-      if (docName.toLowerCase().includes('dummy')) {
-        const fallbacks = ['IPC_Amendment_2023.pdf', 'CRPC_Guidelines_V4.pdf', 'LandAcquisition_Act.pdf'];
-        docName = fallbacks[idx % fallbacks.length];
-      }
-      return {
-        docId: `src-${idx}`,
-        docName,
-        page: src.pages?.[0] ?? (idx * 5 + 10),
-        snippet: 'Relevant excerpt extracted from the document context matching the query.',
-        relevance: 0.7 + (Math.random() * 0.25),
-      };
-    });
-    return {
-      text: answer,
-      citations,
-      meta: { chunks: citations.length, latencyMs, tokens: Math.round(answer.length / 4) },
-    };
-  }
-
-  const handleRegen = useCallback((id: string) => {
-    autoScroll.current = true;
-    // Find the user message preceding the AI message being regenerated
-    const msgIndex = messages.findIndex((m) => m.id === id);
-    let questionText = '';
-    for (let i = msgIndex - 1; i >= 0; i--) {
-      if (messages[i].role === 'user') {
-        questionText = messages[i].text;
-        break;
-      }
-    }
-    if (!questionText) return;
-
-    const aiId = `m${Date.now()}`;
-    // Remove the old AI message being regenerated
-    setMessages((prev) => prev.filter((m) => m.id !== id));
-    runPipeline(async () => {
-      try {
-        const reply = await fetchReply(questionText);
-        const placeholder: Message = {
-          id: aiId,
-          role: 'ai',
-          text: '',
-          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-          streaming: true,
-          feedback: null,
-        };
-        setMessages((prev) => [...prev, placeholder]);
-        streamInto(aiId, reply.text, () => {
-          setMessages((prev) =>
-            prev.map((m) => (m.id === aiId ? { ...m, citations: reply.citations, meta: reply.meta } : m))
-          );
-        });
-      } catch (err) {
-        console.error('Regeneration failed:', err);
-        const errMsg: Message = {
-          id: aiId,
-          role: 'ai',
-          text: 'Sorry, I encountered an error while regenerating the response. Please try again.',
-          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-          feedback: null,
-        };
-        setMessages((prev) => [...prev, errMsg]);
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages]);
-
-  const handleCopy = useCallback((id: string) => {
-    const msg = messages.find((m) => m.id === id);
-    if (!msg) return;
-    navigator.clipboard.writeText(msg.text).catch(() => {});
-    setMessages((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, copied: true } : m))
-    );
-    setTimeout(() => {
-      setMessages((prev) =>
-        prev.map((m) => (m.id === id ? { ...m, copied: false } : m))
-      );
-    }, 2000);
-  }, [messages]);
-
-  function handleSend(text?: string) {
-    const t = (text ?? inputText).trim();
-    if (!t || isTyping) return;
-    autoScroll.current = true;
-    const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-    const userMsg: Message = { id: `m${Date.now()}`, role: 'user', text: t, timestamp: now };
-    setMessages((prev) => [...prev, userMsg]);
-    setInputText('');
-    if (textareaRef.current) textareaRef.current.style.height = 'auto';
-
-    const aiId = `m${Date.now() + 1}`;
-    runPipeline(async () => {
-      try {
-        const reply = await fetchReply(t);
-        const placeholder: Message = {
-          id: aiId,
-          role: 'ai',
-          text: '',
-          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-          streaming: true,
-          feedback: null,
-        };
-        setMessages((prev) => [...prev, placeholder]);
-        streamInto(aiId, reply.text, () => {
-          setMessages((prev) =>
-            prev.map((m) => (m.id === aiId ? { ...m, citations: reply.citations, meta: reply.meta } : m))
-          );
-        });
-      } catch (err) {
-        console.error('Query failed:', err);
-        const errMsg: Message = {
-          id: aiId,
-          role: 'ai',
-          text: 'Sorry, I encountered an error while processing your question. Please ensure the backend is running and documents have been ingested.',
-          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-          feedback: null,
-        };
-        setMessages((prev) => [...prev, errMsg]);
-      }
-    });
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  }
-
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const uploadedDocs: Doc[] = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const newDoc: Doc = {
-        id: `d${Date.now()}-${i}`,
-        name: file.name,
-        pages: 0,
-        status: 'processing',
-        size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-        addedAt: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-        category: 'Uploaded',
-      };
-      uploadedDocs.push(newDoc);
-    }
-    setDocs((prev) => [...uploadedDocs, ...prev]);
-
-    // Upload to backend
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append('files', files[i]);
-    }
-
     try {
-      await ingestPdfs(formData);
-      setDocs((prev) =>
-        prev.map((d) => {
-          const uploaded = uploadedDocs.find((u) => u.id === d.id);
-          return uploaded ? { ...d, status: 'ready' as DocStatus } : d;
-        })
-      );
-    } catch (err) {
-      console.error('PDF ingestion failed:', err);
-      setDocs((prev) =>
-        prev.map((d) => {
-          const uploaded = uploadedDocs.find((u) => u.id === d.id);
-          return uploaded ? { ...d, status: 'error' as DocStatus } : d;
-        })
-      );
+      localStorage.setItem(
+        "sahaybot-chat-v2",
+        JSON.stringify(messages.slice(-40)),
+      )
+    } catch {
+      /* Browser storage can be disabled or full. Chat still works in memory. */
     }
-    e.target.value = '';
+  }, [messages])
+  useEffect(() => {
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setPreview(null)
+        setMenu(false)
+      }
+    }
+    window.addEventListener("keydown", close)
+    return () => window.removeEventListener("keydown", close)
+  }, [])
+  useEffect(() => {
+    bottom.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages, busy])
+  async function refresh() {
+    const [library, status] = await Promise.all([getDocuments(), getHealth()])
+    setDocs(library)
+    setHealth(status)
+    if (scope && !library.some((d) => d.id === scope)) setScope("")
   }
-
-  const filteredDocs = docs.filter((d) =>
-    d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const readyCount = docs.filter((d) => d.status === 'ready').length;
-  const processingCount = docs.filter((d) => d.status === 'processing').length;
-
-  const activeCitationDoc = activeCitation
-    ? docs.find((d) => d.id === activeCitation.docId)
-    : undefined;
-
-  const SIDEBAR_W = 272;
-  const showSuggestions = messages.length === 0;
-
+  useEffect(() => {
+    refresh()
+      .catch((e) => setNotice(e.message))
+      .finally(() => setLoading(false))
+    const timer = setInterval(() => {
+      getHealth()
+        .then(setHealth)
+        .catch(() => setHealth(null))
+    }, 30000)
+    return () => {
+      clearInterval(timer)
+      abort.current?.abort()
+      recognition.current?.abort()
+      window.speechSynthesis?.cancel()
+    }
+  }, [])
+  function changeView(next: View) {
+    setView(next)
+    setMenu(false)
+  }
+  async function send(question = input) {
+    const q = question.trim()
+    if (!q || busy || uploading) return
+    changeView("chat")
+    setInput("")
+    setNotice("")
+    setBusy(true)
+    const history = messages
+      .filter((m) => !m.error)
+      .map(({ role, text }) => ({ role, text }))
+    const user: Message = { id: crypto.randomUUID(), role: "user", text: q }
+    setMessages((prev) => [...prev, user])
+    const controller = new AbortController()
+    abort.current = controller
+    const timeout = setTimeout(() => controller.abort(), 180000)
+    try {
+      const reply = await queryBot(
+        q,
+        lang,
+        scope || undefined,
+        history,
+        controller.signal,
+      )
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "ai",
+          text: reply.answer,
+          reply,
+          language: lang,
+        },
+      ])
+    } catch (e) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "ai",
+          text: controller.signal.aborted
+            ? lang === "HI"
+              ? "अनुरोध रद्द हो गया या समय सीमा समाप्त हुई। पुनः प्रयास करें।"
+              : "Request cancelled or timed out. Please try again."
+            : (e as Error).message,
+          error: true,
+        },
+      ])
+    } finally {
+      clearTimeout(timeout)
+      setBusy(false)
+      abort.current = null
+    }
+  }
+  async function upload(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files || [])
+    event.target.value = ""
+    if (!files.length) return
+    if (
+      files.length > 5 ||
+      files.some(
+        (f) =>
+          !f.name.toLowerCase().endsWith(".pdf") || f.size > 15 * 1024 * 1024,
+      )
+    ) {
+      setNotice(
+        lang === "HI"
+          ? "एक बार में अधिकतम 5 PDF, प्रत्येक 15 MB तक।"
+          : "Upload up to 5 PDFs, each no larger than 15 MB.",
+      )
+      return
+    }
+    setUploading(true)
+    setNotice("")
+    const body = new FormData()
+    files.forEach((f) => body.append("files", f))
+    try {
+      const result = await ingestPdfs(body)
+      setDocs(result.documents)
+      setNotice(result.message)
+      await refresh()
+    } catch (e) {
+      setNotice((e as Error).message)
+      await refresh().catch(() => {})
+    } finally {
+      setUploading(false)
+    }
+  }
+  function voice() {
+    if (listening) {
+      recognition.current?.stop()
+      return
+    }
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      setNotice(
+        lang === "HI"
+          ? "इस ब्राउज़र में आवाज़ पहचान उपलब्ध नहीं है। कृपया टाइप करें या Chrome में खोलें।"
+          : "Voice recognition is unavailable in this browser. Type your question or try Chrome.",
+      )
+      return
+    }
+    const rec = new SpeechRecognition()
+    rec.lang = lang === "HI" ? "hi-IN" : "en-IN"
+    rec.interimResults = false
+    rec.continuous = false
+    rec.onresult = (event: any) =>
+      setInput(
+        (prev) => (prev ? prev + " " : "") + event.results[0][0].transcript,
+      )
+    rec.onend = () => setListening(false)
+    rec.onerror = (event: any) => {
+      setListening(false)
+      setNotice(
+        `Voice input: ${event.error}. Check microphone permission and connection.`,
+      )
+    }
+    recognition.current = rec
+    try {
+      rec.start()
+      setListening(true)
+    } catch {
+      setNotice("Could not start the microphone. Please try again.")
+    }
+  }
+  function speak(message: Message) {
+    if (!("speechSynthesis" in window)) {
+      setNotice("Speech playback is unavailable in this browser.")
+      return
+    }
+    if (speaking === message.id) {
+      window.speechSynthesis.cancel()
+      setSpeaking(null)
+      return
+    }
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(
+      (
+        message.text +
+        (message.reply?.table
+          ? "\n" +
+            message.reply.table.rows
+              .map((row) =>
+                row
+                  .map((cell) => localizeCell(cell, message.language || lang))
+                  .join(". "),
+              )
+              .join("\n")
+          : "")
+      ).replace(/\*|\[\d+\]/g, ""),
+    )
+    const language = message.language || lang
+    utterance.lang = language === "HI" ? "hi-IN" : "en-IN"
+    const voice = window.speechSynthesis
+      .getVoices()
+      .find((v) => v.lang.startsWith(language === "HI" ? "hi" : "en"))
+    if (voice) utterance.voice = voice
+    utterance.onend = () => setSpeaking(null)
+    utterance.onerror = () => {
+      setSpeaking(null)
+      setNotice(
+        "Audio playback failed. Check whether a voice is installed for this language.",
+      )
+    }
+    setSpeaking(message.id)
+    window.speechSynthesis.speak(utterance)
+  }
+  async function copy(text: string) {
+    try {
+      await navigator.clipboard.writeText(text)
+      setNotice(lang === "HI" ? "कॉपी हो गया।" : "Copied.")
+    } catch {
+      setNotice("Clipboard unavailable. Select and copy the text manually.")
+    }
+  }
+  const filtered = docs.filter((d) =>
+    `${d.name} ${d.category} ${d.publisher}`
+      .toLowerCase()
+      .includes(search.toLowerCase()),
+  )
+  const nav: [View, string, string][] = [
+    ["chat", "✦", w.chat],
+    ["finance", "₹", w.finance],
+    ["grievance", "✎", w.grievance],
+    ["library", "▤", w.library],
+  ]
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#f4f5f7' }}>
-      {/* ── Header ── */}
-      <header
-        className="shrink-0 flex items-center justify-between px-5 h-[52px] z-30"
-        style={{
-          background: '#0b1626',
-          borderBottom: '1px solid #0f1d2e',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
-        }}
-      >
-        {/* Left */}
-        <div className="flex items-center gap-3">
+    <div className="app-shell">
+      <input
+        ref={fileRef}
+        type="file"
+        hidden
+        accept="application/pdf,.pdf"
+        multiple
+        onChange={upload}
+      />
+      <aside className={`sidebar ${menu ? "mobile-open" : ""}`}>
+        <div className="brand">
+          <div className="brand-icon">✦</div>
+          <div>
+            <strong>
+              SahayBot<span>सहायबॉट</span>
+            </strong>
+            <small>{w.tagline}</small>
+          </div>
           <button
-            onClick={() => setSidebarOpen((v) => !v)}
-            className="w-7 h-7 rounded flex items-center justify-center text-[#3b5a7a] hover:text-[#64748b] hover:bg-[#162438] transition-colors"
+            className="mobile-close icon-button"
+            aria-label="Close menu"
+            onClick={() => setMenu(false)}
           >
-            <svg width="15" height="13" viewBox="0 0 15 13" fill="none">
-              <rect y="0" width="15" height="1.5" rx=".75" fill="currentColor" />
-              <rect y="5.5" width="10" height="1.5" rx=".75" fill="currentColor" />
-              <rect y="11" width="15" height="1.5" rx=".75" fill="currentColor" />
-            </svg>
+            ×
           </button>
-
-          <div className="w-px h-4 bg-[#162438]" />
-
-          <div className="flex items-center gap-2">
-            <div
-              className="w-6 h-6 rounded-md flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #2d6a4f, #1a3d2e)', boxShadow: '0 2px 6px rgba(45,106,79,0.4)' }}
-            >
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                <path d="M6.5 1.5 L8.5 5H11L9 7.5l.8 3-3.3-2-3.3 2L4 7.5 2 5h2.5z" stroke="white" strokeWidth="1.1" fill="none" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <span className="text-[14px] font-semibold tracking-tight text-white">SahayBot</span>
-            <span
-              className="hidden sm:inline text-[9px] font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded"
-              style={{ background: '#1e4d38', color: '#52b788', border: '1px solid #2d6a4f40' }}
-            >
-              Legal RAG
-            </span>
-          </div>
         </div>
-
-        {/* Center — session */}
-        <div className="hidden md:flex items-center gap-3">
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded"
-            style={{ background: '#0f1d2e', border: '1px solid #162438' }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#52b788]" />
-            <span className="text-[10px] text-[#64748b]">
-              Session · <span className="text-[#3b5a7a] font-mono">LSS-2024-0929</span>
-            </span>
-          </div>
+        <div className="submission-badge">
+          SIH 2026 <span>•</span> PS 26088
         </div>
-
-        {/* Right */}
-        <div className="flex items-center gap-2.5">
-          <div className="hidden sm:flex items-center gap-1.5">
-            <span className="text-[10px] text-[#3b5a7a]">
-              {readyCount} docs · {processingCount > 0 && <span className="text-amber-400">{processingCount} indexing</span>}
-            </span>
-          </div>
-          <div className="w-px h-4 bg-[#162438]" />
-          <div className="flex items-center gap-2">
-            <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold"
-              style={{ background: 'linear-gradient(135deg, #264060, #1a3048)', color: '#94a3b8', border: '1px solid #1e3048' }}
+        <nav>
+          {nav.map(([id, icon, label]) => (
+            <button
+              key={id}
+              className={`nav-item ${view === id ? "active" : ""}`}
+              onClick={() => changeView(id)}
             >
-              RS
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-[11px] font-medium text-[#94a3b8] leading-none">Riya Sharma</p>
-              <p className="text-[9px] text-[#3b5a7a] leading-none mt-0.5">Legal Officer · Div. II</p>
-            </div>
-          </div>
+              <span>{icon}</span>
+              {label}
+              {id === "library" && <small>{docs.length}</small>}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-heading">
+          {lang === "HI" ? "ज्ञान का आधार" : "KNOWLEDGE BASE"}
+          <span>{docs.length}</span>
         </div>
-      </header>
-
-      {/* ── Body ── */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* ── Sidebar ── */}
-        <aside
-          className="shrink-0 flex flex-col overflow-hidden transition-all duration-200 ease-out"
-          style={{
-            width: sidebarOpen ? SIDEBAR_W : 0,
-            background: '#0b1626',
-            borderRight: '1px solid #0f1d2e',
-          }}
+        <div className="sidebar-docs">
+          {loading ? (
+            <p className="small">Loading library…</p>
+          ) : docs.length === 0 ? (
+            <p className="small">{w.empty}</p>
+          ) : (
+            docs.map((d) => (
+              <button
+                key={d.id}
+                className={`sidebar-doc ${scope === d.id ? "selected" : ""}`}
+                onClick={() => {
+                  setScope(scope === d.id ? "" : d.id)
+                  changeView("chat")
+                }}
+                title={d.name}
+              >
+                <span>▤</span>
+                <div>
+                  <strong>{d.category}</strong>
+                  <small>
+                    {d.pages} {lang === "HI" ? "पृष्ठ" : "pages"} · {d.publisher}
+                  </small>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+        <button
+          className="sidebar-upload"
+          disabled={busy || uploading}
+          onClick={() => fileRef.current?.click()}
         >
-          <div
-            className="flex flex-col h-full"
-            style={{
-              width: SIDEBAR_W,
-              opacity: sidebarOpen ? 1 : 0,
-              transition: 'opacity 0.12s',
-              pointerEvents: sidebarOpen ? 'auto' : 'none',
-            }}
-          >
-            {/* Search */}
-            <div className="px-3 pt-3 pb-2.5 shrink-0" style={{ borderBottom: '1px solid #0f1d2e' }}>
-              <div
-                className="flex items-center gap-2 px-2.5 py-2 rounded text-[#3b5a7a] focus-within:text-[#64748b] transition-colors"
-                style={{ border: '1px solid #162438', background: '#0f1d2e' }}
-              >
-                <IconSearch />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search documents…"
-                  className="flex-1 bg-transparent text-[11.5px] text-[#94a3b8] placeholder:text-[#264060] outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Upload button */}
-            <div className="px-3 py-2.5 shrink-0" style={{ borderBottom: '1px solid #0f1d2e' }}>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 py-2 rounded text-[11.5px] font-medium transition-all group"
-                style={{ border: '1px dashed #264060', color: '#52b788', background: 'transparent' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#0f1d2e'; (e.currentTarget as HTMLButtonElement).style.borderColor = '#2d6a4f'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.borderColor = '#264060'; }}
-              >
-                <svg width="11" height="12" viewBox="0 0 11 12" fill="none">
-                  <path d="M5.5 1v7.5M2 4l3.5-3L9 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M0.5 10.5h10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                </svg>
-                Upload PDF Document
-              </button>
-              <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={handleFileUpload} />
-            </div>
-
-            {/* Document list */}
-            <div className="flex-1 scrollable py-2">
-              <div className="px-3 mb-1 flex items-center justify-between">
-                <p className="text-[9px] uppercase tracking-widest text-[#264060] font-semibold">
-                  Library
-                </p>
-                <span className="text-[9px] text-[#264060]">{filteredDocs.length}/{docs.length}</span>
-              </div>
-              {filteredDocs.length === 0 && (
-                <p className="px-3 text-[11px] text-[#264060] italic py-4 text-center">No documents match.</p>
-              )}
-              {filteredDocs.map((doc) => (
-                <button
-                  key={doc.id}
-                  onClick={() => setActiveDoc(doc.id)}
-                  className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left transition-colors group"
-                  style={{ background: activeDoc === doc.id ? '#0f1d2e' : 'transparent' }}
-                  onMouseEnter={(e) => { if (activeDoc !== doc.id) (e.currentTarget as HTMLButtonElement).style.background = '#0a1420'; }}
-                  onMouseLeave={(e) => { if (activeDoc !== doc.id) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
-                >
-                  <div className={`mt-0.5 transition-colors ${activeDoc === doc.id ? 'text-[#52b788]' : 'text-[#3b5a7a]'}`}>
-                    <IconDoc color={activeDoc === doc.id ? '#52b788' : '#3b5a7a'} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className="text-[11.5px] font-medium leading-snug truncate"
-                      style={{ color: activeDoc === doc.id ? '#e2e8f0' : '#64748b' }}
-                    >
-                      {doc.name}
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-[9px] text-[#264060]">{doc.category}</span>
-                      {doc.pages > 0 && (
-                        <>
-                          <span className="text-[#1e3048]">·</span>
-                          <span className="text-[9px] text-[#264060]">{doc.pages}pp</span>
-                        </>
-                      )}
-                      <span className="text-[#1e3048]">·</span>
-                      <span className="text-[9px] text-[#264060]">{doc.size}</span>
-                    </div>
-                  </div>
-                  <StatusDot status={doc.status} />
-                </button>
-              ))}
-            </div>
-
-            {/* Stats bar */}
-            <div
-              className="shrink-0 px-3 py-2.5 flex items-center gap-3"
-              style={{ borderTop: '1px solid #0f1d2e', background: '#060d18' }}
-            >
-              <div className="flex-1">
-                <div className="h-1 rounded-full overflow-hidden" style={{ background: '#162438' }}>
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{ width: `${(readyCount / docs.length) * 100}%`, background: '#2d6a4f' }}
-                  />
-                </div>
-              </div>
-              <span className="text-[9px] text-[#3b5a7a] shrink-0">{readyCount}/{docs.length} indexed</span>
-            </div>
-
-            {/* Settings */}
-            <div className="shrink-0" style={{ borderTop: '1px solid #0f1d2e' }}>
-              <button
-                onClick={() => setSettingsOpen((v) => !v)}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-[10.5px] text-[#3b5a7a] hover:text-[#64748b] hover:bg-[#0f1d2e] transition-colors"
-              >
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <circle cx="6" cy="6" r="2" stroke="currentColor" strokeWidth="1" />
-                  <path d="M6 1v1M6 10v1M1 6h1M10 6h1M2.3 2.3l.7.7M9 9l.7.7M2.3 9.7l.7-.7M9 3l.7-.7" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
-                </svg>
-                RAG Configuration
-                <span className="ml-auto text-[#1e3048]">{settingsOpen ? '▴' : '▾'}</span>
-              </button>
-              {settingsOpen && (
-                <div className="px-3 pb-3 space-y-1.5" style={{ background: '#060d18' }}>
-                  {[
-                    { label: 'Retrieval chunks', value: '5' },
-                    { label: 'Similarity threshold', value: '0.72' },
-                    { label: 'Reranker', value: 'Cross-encoder' },
-                    { label: 'Model', value: 'claude-sonnet-5' },
-                    { label: 'Temperature', value: '0.1' },
-                  ].map((s) => (
-                    <div key={s.label} className="flex justify-between items-center py-0.5">
-                      <span className="text-[9.5px] text-[#264060]">{s.label}</span>
-                      <span className="text-[9.5px] font-mono text-[#52b788]">{s.value}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+          ＋{" "}
+          {uploading
+            ? lang === "HI"
+              ? "इंडेक्स बन रहा है…"
+              : "Indexing PDF…"
+            : w.upload}
+        </button>
+        <div className="sidebar-bottom">
+          <div className="local-dot" />
+          <div>
+            <strong>
+              {health?.ollama === "connected"
+                ? "Local AI connected"
+                : "Local AI unavailable"}
+            </strong>
+            <small>
+              {health?.model || "Llama 3.2"} · {health?.chunks || 0} passages
+            </small>
           </div>
-        </aside>
-
-        {/* ── Chat + Preview ── */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Chat area */}
-          <main className="relative flex flex-col flex-1 overflow-hidden">
-            {/* Context strip */}
-            <div
-              className="shrink-0 flex items-center gap-3 px-5 py-2"
-              style={{ background: '#ffffff', borderBottom: '1px solid #eef0f4' }}
+          <button
+            className="icon-button"
+            title="Refresh status"
+            aria-label="Refresh status"
+            onClick={() => refresh().catch((e) => setNotice(e.message))}
+          >
+            ↻
+          </button>
+        </div>
+      </aside>
+      {menu && (
+        <button
+          className="menu-backdrop"
+          aria-label="Close navigation"
+          onClick={() => setMenu(false)}
+        />
+      )}
+      <div className="workspace">
+        <header className="topbar">
+          <div className="topbar-left">
+            <button
+              className="mobile-menu icon-button"
+              aria-label="Open menu"
+              onClick={() => setMenu(true)}
             >
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#52b788]" />
-                <span className="text-[10px] text-[#64748b]">
-                  <span className="font-medium text-[#334155]">{readyCount} documents</span> in context
-                </span>
-              </div>
-              <div className="h-3 w-px bg-[#eef0f4]" />
-              <div className="flex items-center gap-1.5 overflow-x-auto scrollable" style={{ scrollbarWidth: 'none' }}>
-                {docs.filter((d) => d.status === 'ready').map((d) => (
-                  <span
-                    key={d.id}
-                    className="shrink-0 text-[9px] font-mono px-1.5 py-0.5 rounded text-[#475569]"
-                    style={{ background: '#f7f8fa', border: '1px solid #eef0f4' }}
-                  >
-                    {d.name.replace('.pdf', '')}
-                  </span>
+              ☰
+            </button>
+            <span className="breadcrumb">
+              {
+                w[
+                  view === "chat"
+                    ? "chat"
+                    : view === "finance"
+                      ? "finance"
+                      : view === "grievance"
+                        ? "grievance"
+                        : "library"
+                ]
+              }
+            </span>
+            <span className="prototype-tag">
+              {lang === "HI" ? "कार्यशील प्रोटोटाइप" : "Working prototype"}
+            </span>
+          </div>
+          <div className="topbar-actions">
+            <button
+              className="language"
+              onClick={() => {
+                setLang(lang === "EN" ? "HI" : "EN")
+                document.documentElement.lang = lang === "EN" ? "hi" : "en"
+              }}
+            >
+              अ / A <strong>{lang === "EN" ? "हिन्दी" : "English"}</strong>
+            </button>
+            <button
+              className="new-chat"
+              disabled={busy}
+              onClick={() => {
+                setMessages([])
+                setPreview(null)
+                window.speechSynthesis?.cancel()
+                setSpeaking(null)
+                changeView("chat")
+              }}
+            >
+              {w.new} ＋
+            </button>
+          </div>
+        </header>
+        {notice && (
+          <div className="notice" role="status">
+            <span>{notice}</span>
+            <button
+              className="icon-button"
+              aria-label="Dismiss notice"
+              onClick={() => setNotice("")}
+            >
+              ×
+            </button>
+          </div>
+        )}
+        {health?.error && (
+          <div className="notice" role="alert">
+            {health.error}
+          </div>
+        )}
+        {view === "chat" ? (
+          <>
+            <div className="scope-bar">
+              <label htmlFor="scope">{w.select}</label>
+              <select
+                id="scope"
+                value={scope}
+                onChange={(e) => setScope(e.target.value)}
+              >
+                <option value="">
+                  {w.all} ({docs.length})
+                </option>
+                {docs.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
                 ))}
-              </div>
+              </select>
+              <span className="scope-note">
+                {lang === "HI" ? "मूल PDF से जानकारी" : "Answers from your PDFs"}
+              </span>
             </div>
-
-            {/* Messages */}
-            <div ref={scrollRef} onScroll={handleScroll} className="relative flex-1 scrollable px-5 py-5 flex flex-col gap-5">
-              {showSuggestions && (
-                <div className="flex flex-col items-center justify-center flex-1 gap-6 py-12">
-                  <div className="text-center">
-                    <div
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                      style={{ background: 'linear-gradient(135deg, #2d6a4f, #1a3d2e)', boxShadow: '0 4px 16px rgba(45,106,79,0.3)' }}
-                    >
-                      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                        <path d="M11 2.5 L14.5 9H20.5L15.5 13l2 7-6.5-4-6.5 4 2-7L2 9h6z" stroke="white" strokeWidth="1.5" fill="none" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                    <h2 className="text-[16px] font-semibold text-[#1a2332] mb-1">SahayBot Legal Assistant</h2>
-                    <p className="text-[12px] text-[#94a3b8] max-w-xs">
-                      Ask any legal question — I'll retrieve relevant passages from your uploaded documents.
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-1 gap-2 w-full max-w-lg">
-                    {SUGGESTED_PROMPTS.map((prompt, i) => (
+            <main className="chat-scroll" id="main-content">
+              {messages.length === 0 ? (
+                <div className="welcome">
+                  <div className="welcome-mark">✦</div>
+                  <span className="eyebrow">
+                    {lang === "HI" ? "सहकार से समृद्धि" : "SAHKAR SE SAMRIDDHI"}
+                  </span>
+                  <h1>{w.welcome}</h1>
+                  <p>{w.description}</p>
+                  <div className="prompt-grid">
+                    {PROMPTS[lang].map(([icon, title, q]) => (
                       <button
-                        key={i}
-                        onClick={() => handleSend(prompt)}
-                        className="text-left px-4 py-3 rounded-lg text-[12px] text-[#334155] transition-all hover:shadow-sm"
-                        style={{ background: '#ffffff', border: '1px solid #e2e8f0' }}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#2d6a4f'; (e.currentTarget as HTMLButtonElement).style.color = '#1a2332'; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#e2e8f0'; (e.currentTarget as HTMLButtonElement).style.color = '#334155'; }}
+                        key={title}
+                        className="prompt-card"
+                        disabled={busy || uploading || loading || !docs.length}
+                        onClick={() => send(q)}
                       >
-                        {prompt}
+                        <span className="prompt-icon">{icon}</span>
+                        <strong>{title}</strong>
+                        <p>{q}</p>
+                        <span className="prompt-arrow">↗</span>
                       </button>
                     ))}
                   </div>
+                  <div className="welcome-foot">
+                    <span>
+                      ✓ {lang === "HI" ? "मूल दस्तावेज़" : "Source documents"}
+                    </span>
+                    <span>
+                      ✓ {lang === "HI" ? "हिन्दी और अंग्रेज़ी" : "Hindi & English"}
+                    </span>
+                    <span>✓ {lang === "HI" ? "स्थानीय AI" : "Local AI"}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="messages">
+                  {messages.map((m) => (
+                    <article
+                      key={m.id}
+                      className={`message ${m.role} ${m.error ? "error" : ""}`}
+                    >
+                      <div className="message-avatar">
+                        {m.role === "ai" ? "✦" : lang === "HI" ? "आप" : "You"}
+                      </div>
+                      <div className="message-body">
+                        <div className="message-label">
+                          {m.role === "ai"
+                            ? "SahayBot"
+                            : lang === "HI"
+                              ? "आपका प्रश्न"
+                              : "Your question"}
+                          {m.reply && (
+                            <span>
+                              {(m.reply.meta.latencyMs / 1000).toFixed(1)}s ·{" "}
+                              {m.reply.meta.chunks}{" "}
+                              {lang === "HI" ? "अंश" : "passages"}
+                            </span>
+                          )}
+                        </div>
+                        <Answer
+                          text={m.text}
+                          sources={m.reply?.sources || []}
+                          open={setPreview}
+                        />
+                        {m.reply?.table && (
+                          <SourceTable
+                            table={m.reply.table}
+                            lang={m.language || lang}
+                          />
+                        )}
+                        {m.reply?.mode === "source_excerpts" && (
+                          <div className="mode-warning">
+                            {lang === "HI"
+                              ? "AI उत्तर उपलब्ध नहीं है — मूल अंश दिखाए गए हैं।"
+                              : "Source excerpt mode — AI generation unavailable."}
+                          </div>
+                        )}
+                        {m.reply && m.reply.sources.length > 0 && (
+                          <details className="evidence">
+                            <summary>
+                              {w.sources} · {m.reply.sources.length}
+                            </summary>
+                            <p className="small muted">
+                              {lang === "HI"
+                                ? "ये खोज में मिले अंश हैं। व्यक्तिगत सलाह से पहले स्रोत और लागू नियम जाँचें।"
+                                : "These are retrieved passages. Verify the source and applicable rules before acting."}
+                            </p>
+                            <div className="source-grid">
+                              {m.reply.sources.map((s) => (
+                                <button
+                                  key={s.number}
+                                  className="source-card"
+                                  onClick={() => setPreview(s)}
+                                >
+                                  <span className="source-number">
+                                    {s.number}
+                                  </span>
+                                  <div>
+                                    <strong>{s.docName}</strong>
+                                    <small>
+                                      {lang === "HI" ? "PDF पृष्ठ" : "PDF page"}{" "}
+                                      {s.page} · {s.publisher}
+                                    </small>
+                                    <p>{s.snippet.slice(0, 150)}…</p>
+                                  </div>
+                                  <span>↗</span>
+                                </button>
+                              ))}
+                            </div>
+                          </details>
+                        )}
+                        {m.role === "ai" && (
+                          <div className="message-actions">
+                            <button
+                              onClick={() =>
+                                copy(
+                                  m.text +
+                                    (m.reply?.table
+                                      ? "\n\n" +
+                                        [
+                                          m.reply.table.headers,
+                                          ...m.reply.table.rows,
+                                        ]
+                                          .map((row) => row.join(" | "))
+                                          .join("\n")
+                                      : ""),
+                                )
+                              }
+                            >
+                              {w.copy}
+                            </button>
+                            <button onClick={() => speak(m)}>
+                              {speaking === m.id
+                                ? "◼ " + w.stop
+                                : "◖ " + w.speak}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </article>
+                  ))}
+                  {busy && (
+                    <div className="thinking" role="status">
+                      <span className="spinner" />
+                      {w.thinking}
+                      <button onClick={() => abort.current?.abort()}>
+                        {lang === "HI" ? "रद्द करें" : "Cancel"}
+                      </button>
+                    </div>
+                  )}
+                  <div ref={bottom} />
                 </div>
               )}
-
-              {messages.map((msg) =>
-                msg.role === 'user' ? (
-                  <UserBubble key={msg.id} msg={msg} onCopy={handleCopy} />
-                ) : (
-                  <AiBubble
-                    key={msg.id}
-                    msg={msg}
-                    onCopy={handleCopy}
-                    onCitationOpen={setActiveCitation}
-                    onFeedback={handleFeedback}
-                    onRegen={handleRegen}
-                  />
-                )
-              )}
-
-              {isTyping && <TypingIndicator stage={retrievalStage} />}
-              <div ref={chatEndRef} />
-            </div>
-
-            {/* Scroll to bottom */}
-            {showScrollBtn && (
-              <button
-                onClick={scrollToBottom}
-                className="fab-in absolute right-6 bottom-[120px] z-10 w-9 h-9 rounded-full flex items-center justify-center text-white transition-transform hover:scale-105"
-                style={{ background: 'linear-gradient(135deg, #2d6a4f, #1e4d38)', boxShadow: '0 4px 14px rgba(11,22,38,0.25)' }}
-                title="Jump to latest"
+            </main>
+            <footer className="composer">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  send()
+                }}
               >
-                <IconChevronDown />
-              </button>
-            )}
-
-            {/* ── Input bar ── */}
-            <div
-              className="shrink-0 px-5 pb-4 pt-3"
-              style={{ background: '#ffffff', borderTop: '1px solid #eef0f4', boxShadow: '0 -4px 20px rgba(0,0,0,0.04)' }}
-            >
-              <div
-                className="flex items-end gap-2 rounded-xl px-3 py-2.5 transition-shadow"
-                style={{ border: '1.5px solid #dde2ea', background: '#f7f8fa' }}
-                onFocus={() => {}}
-              >
-                {/* Mic */}
                 <button
-                  onClick={() => {
-                    if (micActive) {
-                      // Stop listening
-                      if (recognitionRef.current) recognitionRef.current.stop();
-                      setMicActive(false);
-                    } else {
-                      // Start listening via Web Speech API
-                      if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-                        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                        const recognition = new SpeechRecognition();
-                        recognition.continuous = false;
-                        recognition.interimResults = false;
-                        recognition.lang = lang === 'EN' ? 'en-US' : 'hi-IN';
-                        recognition.onresult = (event: any) => {
-                          const transcript = event.results[0][0].transcript;
-                          setInputText((prev) => prev + transcript);
-                        };
-                        recognition.onend = () => setMicActive(false);
-                        recognition.onerror = () => setMicActive(false);
-                        recognitionRef.current = recognition;
-                        recognition.start();
-                        setMicActive(true);
-                      } else {
-                        console.warn('Speech Recognition not supported in this browser.');
-                      }
+                  type="button"
+                  className={`mic-button ${listening ? "listening" : ""}`}
+                  aria-label={listening ? "Stop listening" : "Voice input"}
+                  title={listening ? "Stop listening" : "Voice input"}
+                  onClick={voice}
+                  disabled={busy}
+                >
+                  🎙
+                </button>
+                <textarea
+                  value={input}
+                  maxLength={2000}
+                  rows={2}
+                  aria-label={w.input}
+                  placeholder={w.input}
+                  disabled={busy}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault()
+                      send()
                     }
                   }}
-                  className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all ${micActive ? 'mic-active' : 'hover:bg-[#eef0f4]'}`}
-                  style={micActive ? { background: 'linear-gradient(135deg, #2d6a4f, #1e4d38)', boxShadow: '0 0 0 3px rgba(82,183,136,0.2)' } : { background: 'transparent' }}
-                  title={micActive ? 'Stop listening' : 'Voice input'}
-                >
-                  <svg width="13" height="15" viewBox="0 0 13 15" fill="none">
-                    <rect x="3.5" y="0.75" width="6" height="8.5" rx="3" stroke={micActive ? 'white' : '#64748b'} strokeWidth="1.2" />
-                    <path d="M1 7.5a5.5 5.5 0 0 0 11 0" stroke={micActive ? 'white' : '#64748b'} strokeWidth="1.2" strokeLinecap="round" />
-                    <path d="M6.5 13v1.5M4.5 14.5h4" stroke={micActive ? 'white' : '#64748b'} strokeWidth="1.2" strokeLinecap="round" />
-                  </svg>
-                </button>
-
-                {/* Textarea */}
-                <textarea
-                  ref={textareaRef}
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={lang === 'EN' ? 'Ask a legal question… (Shift+Enter for new line)' : 'कानूनी प्रश्न पूछें…'}
-                  rows={1}
-                  className="flex-1 resize-none bg-transparent text-[13px] text-[#1a2332] placeholder:text-[#94a3b8] outline-none leading-relaxed py-0.5"
-                  style={{ maxHeight: 108, fontFamily: 'Inter, sans-serif' }}
-                  onInput={(e) => {
-                    const el = e.currentTarget;
-                    el.style.height = 'auto';
-                    el.style.height = Math.min(el.scrollHeight, 108) + 'px';
-                  }}
                 />
-
-                {/* Upload */}
                 <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-[#94a3b8] hover:text-[#64748b] hover:bg-[#eef0f4] transition-colors"
-                  title="Upload PDF"
+                  className="send-button"
+                  type="submit"
+                  disabled={!input.trim() || busy || uploading || !docs.length}
                 >
-                  <svg width="13" height="15" viewBox="0 0 13 15" fill="none">
-                    <path d="M1.5 1.5h7l3 3V13.5a.5.5 0 0 1-.5.5H2a.5.5 0 0 1-.5-.5v-12A.5.5 0 0 1 1.5 1.5Z" stroke="currentColor" strokeWidth="1.15" />
-                    <path d="M8.5 1.5V5h3" stroke="currentColor" strokeWidth="1.15" />
-                    <path d="M6.5 6.5v4M4.5 8.5l2-2 2 2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  {w.send} ↑
                 </button>
-
-                {/* Lang toggle */}
-                <button
-                  onClick={() => setLang((v) => (v === 'EN' ? 'HI' : 'EN'))}
-                  className="shrink-0 h-8 px-2.5 rounded-lg text-[10.5px] font-semibold tracking-wide transition-all"
-                  style={
-                    lang === 'HI'
-                      ? { background: '#2d6a4f', color: 'white', border: '1px solid #2d6a4f' }
-                      : { background: 'transparent', color: '#94a3b8', border: '1px solid #dde2ea' }
-                  }
-                >
-                  {lang === 'EN' ? 'हिं' : 'EN'}
-                </button>
-
-                {/* Send */}
-                <button
-                  onClick={() => handleSend()}
-                  disabled={!inputText.trim()}
-                  className="shrink-0 h-8 px-4 rounded-lg text-[11.5px] font-semibold text-white transition-all"
-                  style={{
-                    background: inputText.trim()
-                      ? 'linear-gradient(135deg, #2d6a4f, #1e4d38)'
-                      : '#e2e8f0',
-                    color: inputText.trim() ? 'white' : '#94a3b8',
-                    cursor: inputText.trim() ? 'pointer' : 'default',
-                    boxShadow: inputText.trim() ? '0 2px 8px rgba(45,106,79,0.3)' : 'none',
-                  }}
-                >
-                  Send
-                </button>
-              </div>
-
-              {/* Mic hint */}
-              {micActive && (
-                <div className="flex items-center gap-2 mt-2 ml-1">
-                  <div className="flex gap-0.5 items-end h-3">
-                    {[3, 5, 4, 6, 3, 5].map((h, i) => (
-                      <div
-                        key={i}
-                        className="w-0.5 rounded-full bg-[#52b788]"
-                        style={{ height: h * 2, animation: `dot-bounce 1.2s ease-in-out ${i * 0.1}s infinite` }}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-[10px] text-[#52b788] font-medium">Listening…</span>
+              </form>
+              {listening && (
+                <div role="status" className="listening-hint">
+                  {lang === "HI" ? "सुन रहे हैं…" : "Listening…"}
                 </div>
               )}
-
-              <p className="text-[9.5px] text-[#c4cdd8] text-center mt-2">
-                SahayBot provides AI-assisted legal summaries. Always consult a qualified advocate. · Powered by Claude Sonnet 5
+              <p>{w.disclaimer}</p>
+              <details className="privacy-note">
+                <summary>
+                  {lang === "HI"
+                    ? "आवाज़ और बातचीत की गोपनीयता"
+                    : "Voice & conversation privacy"}
+                </summary>
+                <p>
+                  {w.offline} {w.history}
+                </p>
+              </details>
+            </footer>
+          </>
+        ) : view === "finance" ? (
+          <main className="page-scroll" id="main-content">
+            <Finance lang={lang} ask={send} />
+          </main>
+        ) : view === "grievance" ? (
+          <main className="page-scroll" id="main-content">
+            <Grievance lang={lang} ask={send} />
+          </main>
+        ) : (
+          <main className="page-scroll" id="main-content">
+            <div className="tool-page">
+              <span className="eyebrow">
+                {lang === "HI" ? "देखने योग्य स्रोत" : "EVIDENCE YOU CAN OPEN"}
+              </span>
+              <h1>{w.library}</h1>
+              <p className="intro">
+                {lang === "HI"
+                  ? "सरकारी दस्तावेज़ और आपके अपलोड किए गए PDF। मॉडल उपविधियाँ राज्य में लागू उपविधियों का स्थान नहीं लेतीं।"
+                  : "Official references and your uploaded PDFs. Model bye-laws do not replace the rules adopted in your state."}
+              </p>
+              <div className="library-toolbar">
+                <input
+                  placeholder={
+                    lang === "HI" ? "दस्तावेज़ खोजें…" : "Search documents…"
+                  }
+                  aria-label="Search documents"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <button
+                  className="primary"
+                  disabled={uploading || busy}
+                  onClick={() => fileRef.current?.click()}
+                >
+                  {uploading ? "Indexing…" : w.upload}
+                </button>
+              </div>
+              {filtered.map((d) => (
+                <article key={d.id} className="library-card">
+                  <div className="library-icon">▤</div>
+                  <div className="library-content">
+                    <span className="eyebrow">{d.publisher}</span>
+                    <h2>{d.name}</h2>
+                    <p>{d.category}</p>
+                    <p className="small muted">{d.note}</p>
+                    <span className="doc-stats">
+                      {d.pages} pages · {(d.size / 1048576).toFixed(1)} MB ·{" "}
+                      {d.chunks} indexed passages
+                    </span>
+                  </div>
+                  <div className="library-actions">
+                    <a
+                      className="secondary"
+                      href={documentUrl(d.id)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {lang === "HI" ? "PDF खोलें" : "Open PDF"} ↗
+                    </a>
+                    {d.sourceUrl && (
+                      <a
+                        className="text-link"
+                        href={d.sourceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {lang === "HI" ? "मूल स्रोत" : "Original source"} ↗
+                      </a>
+                    )}
+                    {d.publisher === "User upload" && (
+                      <button
+                        className="danger"
+                        disabled={busy || uploading}
+                        onClick={async () => {
+                          try {
+                            await deleteDocument(d.id)
+                            await refresh()
+                            setPreview(null)
+                          } catch (e) {
+                            setNotice((e as Error).message)
+                          }
+                        }}
+                      >
+                        {lang === "HI" ? "हटाएँ" : "Remove"}
+                      </button>
+                    )}
+                  </div>
+                </article>
+              ))}
+              {!filtered.length && (
+                <p className="panel">
+                  {loading
+                    ? "Loading…"
+                    : docs.length
+                      ? "No documents match."
+                      : w.empty}
+                </p>
+              )}
+              <p className="small muted">
+                {lang === "HI"
+                  ? "टेक्स्ट वाला PDF, अधिकतम 15 MB। समान नाम वाला अपलोड पुराने संस्करण को बदलता है। स्कैन के लिए पहले OCR करें।"
+                  : "Text PDFs, up to 15 MB each. Uploading the same filename replaces the earlier version. Scans require OCR first."}
               </p>
             </div>
           </main>
-
-          {/* ── Document Preview Panel ── */}
-          <DocPreviewPanel
-            citation={activeCitation}
-            doc={activeCitationDoc}
-            onClose={() => setActiveCitation(null)}
-          />
-        </div>
+        )}
       </div>
+      {preview && (
+        <div className="preview-backdrop" onClick={() => setPreview(null)}>
+          <section
+            className="preview-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Source document"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <header>
+              <div>
+                <strong>{preview.docName}</strong>
+                <small>
+                  {lang === "HI" ? "PDF पृष्ठ" : "PDF page"} {preview.page}
+                </small>
+              </div>
+              <button
+                className="icon-button"
+                autoFocus
+                aria-label={w.close}
+                onClick={() => setPreview(null)}
+              >
+                ×
+              </button>
+            </header>
+            <div className="preview-excerpt">
+              <span className="eyebrow">
+                {lang === "HI" ? "मूल दस्तावेज़ का अंश" : "ACTUAL RETRIEVED PASSAGE"}
+              </span>
+              <blockquote>{preview.snippet}</blockquote>
+              <p className="small muted">{preview.note}</p>
+              <a
+                className="text-link"
+                href={documentUrl(preview.docId, preview.page)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {lang === "HI" ? "नई विंडो में PDF खोलें" : "Open PDF in a new tab"}{" "}
+                ↗
+              </a>
+            </div>
+            <iframe
+              title={`${preview.docName}, page ${preview.page}`}
+              src={documentUrl(preview.docId, preview.page)}
+            />
+          </section>
+        </div>
+      )}
     </div>
-  );
+  )
 }

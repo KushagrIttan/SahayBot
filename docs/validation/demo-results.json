@@ -1,0 +1,362 @@
+[
+  {
+    "question": "What services can a PACS provide under the model bye-laws?",
+    "language": "EN",
+    "answer": "Under the model bye-laws, a PACS can provide more than 25 business activities, including dairy, fishery, floriculture, setting up godowns, procurement of foodgrains, fertilizers, seeds, LPG/CNG/Petrol/Diesel distributorship, short-term & long-term credit, custom hiring centers, Fair Price Shops (FPS), community irrigation, Business Correspondent activities, Common Service Centre, etc.",
+    "sources": [
+      {
+        "docId": "dd5b8eef4e395f4529a2",
+        "docName": "Cooperation_Annual_Report_2024_25.pdf",
+        "page": 95,
+        "snippet": "●                  Financial Parameters: Includes information on banking linkages, net profit\n            generation, dividend distribution, annual turnover and overall financial\n            health and sustainability of the cooperative society.\n\n        ●        Audit Compliance: Evaluation of audit compliance including timeliness,\n            frequency and category of audit.\n\n        Each parameter is assigned an appropriate weight within a total of 100 marks,\nwith higher emphasis on audit and financial performance. The aim is to promote\ntransparency, good governance, and healthy competition among cooperative\nsocieties, including housing cooperatives, at various levels.\n\n3.3.9  INTEGRATION  OF NCD  PORTAL WITH OTHER DATABASES\n\n        The Ministry of Cooperation has taken several initiatives to fulfil the vision of\n‘Sahkar se Samriddhi’, including development of National Cooperative Database\n(NCD), Computerization of Primary Agricultural Credit Societies (PACS) through e -\nPACS software. Further, as part of its efforts to enhance Primary Agricultural Credit\nSocieties (PACS) viability and expand their activities, the Ministry has also introduced\nModel Bye-laws that enable PACS to function as Common Service  Centers (CSC),\nPradhan Mantri Bhartiya Jan Aushadhi Kendras (PMBJK), and Pradhan Mantri Kisan\nSamriddhi Kendras (PMKSK), among others. Additionally, steps are being taken to\nencourage and facilitate PACS for early registration on the Udyam portal under the\nMinistry of Micro, Small and Medi um Enterprises (MSME).\n\n        In order to maintain accurate and updated data on PACS, the NCD portal is\nintegrating with e-PACS software through Application Programming Interface (API).\nT his int egration would f acilit ate automat ic data updat es in t he NCD port al.  Addit ionally,\nfor data updates on PACS operating as CSC, PMBJK, and PMKSK, as well as those\nregistered on the Udyam portal, the NCD is being integrated with the databases /\nportals of different ministries / departments through API. Such integration is enabling\nautomatic data sync hronization and efficient management of information.\n\n\n\n\n\n\n\n\n\n                                                  79",
+        "similarity": 0.733,
+        "publisher": "Ministry of Cooperation",
+        "sourceUrl": "https://cooperation.gov.in/sites/default/files/2026-03/511_Annual%20Report%202024-25%20%28Final%29.pdf",
+        "note": "Reporting period 2024–25",
+        "number": 1
+      },
+      {
+        "docId": "dd5b8eef4e395f4529a2",
+        "docName": "Cooperation_Annual_Report_2024_25.pdf",
+        "page": 60,
+        "snippet": "organizational weaknesses, inefficient management, inadequate lending resources,\nand insufficient income from short -term loans to sustain them financially.\n\n        In order to improve the viability of Primary Agricultural Credit Societies (PACS)\nand diversify their business activities to transform them into vibrant economic entities\nat Panchayat/ village level, Model Bye-laws have been framed by Ministry of\nCooperation in consultation with States/ Union Territories, Central Government\nMinistries, NABARD, National Level Federations, State Cooperative Banks, District\nCentral Cooperative Banks NABARD, VAMNICOM, NCCT and the general public.\nThese Model Bye-laws were circulated to all the States/ UTs for adoption by PACS\nafter making suitable changes as per respective State Cooperative Acts. The Model\nBye-laws have now been adopted by 32 States/UTs, or their existing by -laws are in\nline with Model By -laws.\n\n        The Model Bye-laws will enable PACS to diversify their business activities by\nundertaking more than 25 business activities, including dairy, fishery, floriculture,\nsetting up godowns, procurement of foodgrains, fertilizers, seeds,\nLPG/CNG/Petrol/Diesel distributorship, short -term & long-term credit, custom hiring\ncenters, Fair Price Shops (FPS), community irrigation, Business Correspondent\nactivities, Common Service Centre, etc. Provisions have also been made to make the\nmembership of PACS more inclusive and broad-based, giving adequate\nrepresentation to women and Schedul ed Castes/Schedules Tribes.\n\n                                                                 By adopting Model Bye-laws, PACS would be able to serve as multi -service\ncenters, improve their operational efficiency, transparency and accountability and\nprovide agricultural credit and various non -credit services, etc. in rural areas.\n\n                                                                               The Model Bye-laws will help farmers in getting short -term, medium -term and\nlong-term credit and other services such as fertilizers, seeds, pesticides, storage\nfacilities, banking services, etc. at one stop for meeting their varied needs. Farmers\nwill als o be able to obtain benefits of social security schemes, micro insurance, more\nthan 300 e-services of CSC, etc. Through diversification of business activities, Model\nBye-laws will also enable farmers to get additional and stable sources of income.\n\n        So far, 32 States/ UTs have adopted the new Model Bye -laws or their existing\nbye-laws are in line with Model Bye-laws. Three Union Territories, namely Delhi,\nChandigarh and Lakshadweep do not have any PACS.\n\n                                                    44",
+        "similarity": 0.534,
+        "publisher": "Ministry of Cooperation",
+        "sourceUrl": "https://cooperation.gov.in/sites/default/files/2026-03/511_Annual%20Report%202024-25%20%28Final%29.pdf",
+        "note": "Reporting period 2024–25",
+        "number": 2
+      },
+      {
+        "docId": "dd5b8eef4e395f4529a2",
+        "docName": "Cooperation_Annual_Report_2024_25.pdf",
+        "page": 171,
+        "snippet": "ANNEXURE-II: PROGRESS  ON  MAJOR INITIATIVES  TAKEN BY THE\n\n                         MI NI ST R Y ( AS ON MARCH, 2025)\n\n\n       Ministry of Cooperation, since its inception on 06.07.2021, has undertaken\nseveral initiatives to realize the vision of “Sahakar-se-Samriddhi” and to strengthen &\ndeepen  the  cooperative movement from  Primary to  Apex   level Cooperatives  in the\ncountry. List of initiatives taken and progress made so far are as follows:\n\nA.         Making Primary Cooperatives economically vibrant and transparent\n\n       1. Model Bye-Laws for PACS making them multipurpose,\n           multidimensional and transparent entities: Government, in\n           consultation with  all the  stakeholders,  including  States/ UTs, National\n           Level Federations, State Cooperative Banks (StCBs), District Central\n           Cooperative Banks (DCCBs), etc., has prepared and circulated Model\n           Bye-laws for PACS to all the States/ UTs, which enable PACS to\n           undertake more than 25 business activities, improve governance,\n           transparency and accountability in their operations. Provisions have also\n           been made to make the membership of PACS more inclusive and broad  -\n           based, giving adequate representation to women and Scheduled\n           Castes/Schedules Tribes. So far, 32 States/ UTs have adopted Model\n           Bye-laws or their existing bye-laws are in line with Model Bye -laws.\n\n       2. Strengthening of PACS through Computerization: In order to\n           strengthen PACS, project for Computerization of functional PACS with\n           an outlay of ₹2,516 Crore has been approved by the Government of\n           India, which entails bringing all functional PACS in the Country onto a\n           common ERP based national software, linking them with NABARD\n           through StCBs and DCCBs. A total of 79,630 PACS from 31 States/ UTs\n           have been sanctioned under the project. A total of 60,353 PACS have\n           been onboarded on ERP Software and hardware has been procured by\n           31 States/UTs.\n\n       3.              Establishing New Multipurpose PACS/ Dairy/ Fishery Cooperatives\n           in covering all the Panchayats: The Government of India has approved\n           the plan to establish new multipurpose PACS/dairy/fisheries\n\n\n                                               155",
+        "similarity": 0.711,
+        "publisher": "Ministry of Cooperation",
+        "sourceUrl": "https://cooperation.gov.in/sites/default/files/2026-03/511_Annual%20Report%202024-25%20%28Final%29.pdf",
+        "note": "Reporting period 2024–25",
+        "number": 3
+      },
+      {
+        "docId": "dd5b8eef4e395f4529a2",
+        "docName": "Cooperation_Annual_Report_2024_25.pdf",
+        "page": 59,
+        "snippet": "the implementation of the Common Accounting System (CAS) and Management\nInformation System (MIS) would allow PACS to conduct its operations. It would also\nfurther financial inclusion and strengthen service delivery to farmers, especially the\nsmall and marginal ones.\n\n       So far, proposals to computerize  79, 630 PACS in 31 States and UTs have been\nsanctioned under this Project. NABARD has already developed the software, which\nhas various modules as part of Common accounting system, including Banking,\nExternal Integration/ Interfaces, CBS Integration, Financial accounting and Tax,\nAdministration and Governance, Regulation, etc. Further, it is customizable for State  -\nspecific needs to capture data on all functionalities of PACS, both credit and non  -credit\nincluding  system software with  disaster  recovery features. This  compr  ehensive  ERP\nsoftware solution covers various aspects, including membership, financial services,\ndeposits, loans, audit, procurement, processing units, PDS, business planning,\nwarehousing, merchandising, borrowings, asset management, etc. with cyber\nsecurity.\n\n       More than 60,353 PACS across 31 States and UTs have been onboarded on\nthe ERP Software. Over 6 5,176 PACS have purchased hardware thus far, spanning\n31 States. 58,896 PACS in 31 States/UTs have been made Go -live and 56,783 PACS\nare doing Day-end activities across 31 States/UTs. On-system audit has been\nconducted in 37,354 PACS. 53,729 PACS members/ secretaries have already been\ntrained for ERP software.\n\n3.1.2 MODEL BYE-LAWS FOR PRIMARY AGRICULTURAL CREDIT\nSOCIETIES (PACS)\n\n       India has over 1 Lakh Primary Agricultural Credit Societies (PACS), which are\nthe lowest level of the Short -Term Cooperative Credit (STCC) structure and play a\nvital role in the advancement of the rural economy. PACS offer short -term and\nmedium-term credit as well as other services to member farmers, including the\ndistribution of fertilizers, seeds, pesticides, and storage facilities, etc. Currently, PACS\nare governed by different State Cooperative Societies Acts with varying provisions.\nSeveral factors contribute to the decline or non-functionality of PACS, such as\n\n\n\n\n\n                                                43",
+        "similarity": 0.512,
+        "publisher": "Ministry of Cooperation",
+        "sourceUrl": "https://cooperation.gov.in/sites/default/files/2026-03/511_Annual%20Report%202024-25%20%28Final%29.pdf",
+        "note": "Reporting period 2024–25",
+        "number": 4
+      },
+      {
+        "docId": "dd5b8eef4e395f4529a2",
+        "docName": "Cooperation_Annual_Report_2024_25.pdf",
+        "page": 136,
+        "snippet": "⮚       IFFCO to establish 200 model PACS within a year which will provide all the\n                         services initiated by the Ministry.\n\n             ⮚              NCCF to achieve target of turnover of  ₹ 50,000 Crore by 2027-28.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n                                                                                                                                                            120",
+        "similarity": 0.534,
+        "publisher": "Ministry of Cooperation",
+        "sourceUrl": "https://cooperation.gov.in/sites/default/files/2026-03/511_Annual%20Report%202024-25%20%28Final%29.pdf",
+        "note": "Reporting period 2024–25",
+        "number": 5
+      }
+    ],
+    "mode": "generated",
+    "meta": {
+      "chunks": 5,
+      "latencyMs": 8536,
+      "model": "llama3.2:3b",
+      "retrievalQuestion": "What services can a PACS provide under the model bye-laws?"
+    }
+  },
+  {
+    "question": "What are the farmer premium rates under PMFBY?",
+    "language": "EN",
+    "answer": "The reference document gives the following premium table. These are the document’s figures; verify your current state notification. [1]",
+    "sources": [
+      {
+        "docId": "532d15b9d532c4a3bc77",
+        "docName": "PMFBY_Operational_Guidelines_2023.pdf",
+        "page": 47,
+        "snippet": "11.          Digitization of Land Records\n\n11.1         Under  the  Central  Sector  Scheme  of  Digital  India  Land  Record  Modernization\n             Program (DILRMP), majority of the State/UTs have digitized their land records. To\n             address the problems of over insurance and acreage discrepancy, State/UTs are\n             strongly advised to integrate their digitized land records with the NCIP so that the\n             individual  land  records  of  farmers  can  be  accessed  through  the  NCIP  for  crop\n             insurance and the insured area be validated. This will help the Government to reach\n             and identify individual beneﬁciaries and bring utmost transparency and authenticity\n             in  providing  scheme  benefits  to  the  genuine  beneficiaries  as  per  their  eligibility\n             norms in the right spirits of provisions of the Operational Guidelines.\n\n12.          Sum Insured/Coverage Limit\n\n12.1         States/UTs need to choose either the Scale of Finance or Notional Average Value\n             (Notional Average Yield * MSP/Farm Gate) price method for computation of Sum\n             Insured for a district-crop combination for the entire period of the contract. The crop-\n             wise  sum  insured  notiﬁed  in  the  ﬁrst  year/season  could  be  changed  in  the\n             subsequent year/season as per the change in the Scale of ﬁnance or MSP/ Farm\n             gate price as available for the notiﬁed crop and decided upon by the State. However,\n             any  change  in  the  sum  insured  over  a  year  due  to  changes  in  the  scale  of\n             ﬁnance/farm gate price will be capped at 10% within the contract period. The sum\n             Insured for individual farmer is equal to the Scale of ﬁnance or Notional Average\n             Value (NAY x MSP/Farm Gate Price) per hectare multiplied by the insured area of\n             the notiﬁed crop proposed by the farmer for insurance.\n\n12.2         Area under cultivation shall always be expressed in Hectare for all crops including\n             perennial horticulture crops, accordingly the State Governments/UT Administrations\n             are required to mandatorily notify the applicable premium and sum insured values\n             at Per Hectare basis rather than per plant basis.\n\n12.3         In cases where crops are separately notiﬁed under irrigated, rainfed category by the\n             States/UTs,  the  Sum  Insured  value  for  irrigated  and  rainfed  areas  should  be\n             separately indicated and notified.\n\n13.          Premium Rates and Premium Subsidy\n\n13.1         The Actuarial Premium Rate (APR) would be charged under PMFBY& RWBCIS by\n             the implementing Insurance Company. The rate of premium payable by the farmer\n             will be as per the following Table 1:\n\n                                                                             Maximum Premium Rate payable\n       Season                              Crops                                           by farmer\n                                                                                     (% of Sum Insured)*\n                          All Food grain and Oilseeds crops                      2.0% of SI or Actuarial rate,\n        Kharif             (all Cereals, Millets, Pulses and                          whichever is less\n                                     Oilseeds crops)\n                          All Food grain and Oilseeds crops                      1.5% of SI or Actuarial rate,\n         Rabi              (all Cereals, Millets, Pulses and                          whichever is less\n                                     Oilseeds crops)\n                              Annual Commercial/ Annual                           5% of SI or Actuarial rate,\n  Kharif and Rabi                   Horticultural crops                               whichever is less\n                         Perennial horticultural / commercial  5% of SI or Actuarial rate,\n\n                                             www.pmfby.gov.in\n\n                                Operational Guidelines 2023 of PMFBY                                       47",
+        "similarity": 0.67,
+        "publisher": "Department of Agriculture & Farmers Welfare / PMFBY portal",
+        "sourceUrl": "https://pmfby.amnex.co.in/pmfby/pdf/operational_guidelines_pmfby.pdf",
+        "note": "Effective from Kharif 2023; check current state notification",
+        "number": 1
+      },
+      {
+        "docId": "532d15b9d532c4a3bc77",
+        "docName": "PMFBY_Operational_Guidelines_2023.pdf",
+        "page": 48,
+        "snippet": "crops (pilot basis)  whichever is less\n\n  *Note: Premium paid by non-loanee farmers should be rounded off to nearest Rupee.\n\nPayment of Government Subsidy\n\n                All farmers enrolled under the scheme would be entitled for admissible subsidy on the\n             Actuarial Premium. All demands for premium subsidies shall be mandatorily routed\n             through the NCIP by the Insurance Companies and paid through PFMS system by\n             the GoI.\n\n13.1.1       The difference between Actuarial Premium Rate (APR) and the Rate of Insurance\n             premium  payable  by  farmers  shall  be  treated  as  the  Rate  of  Normal  Premium\n             Subsidy, which shall be shared equally in 50:50 ratio by the Centre and State/UTs\n             in all State/UTs except Himalayan & North Eastern Region (NER) State/UTs where\n             subsidy sharing pattern between the Centre and State/UTs shall be in the 90:10\n             ratio.\n\n13.1.2       The full GoI share in the premium subsidy as per sharing pattern in                          Para 13.1.1\n             above will be applicable only up to APR of 25% and 30% with respect to irrigated\n             and rainfed areas/district, respectively. For APR beyond those rates, GoI share of\n             subsidy will be limited to the applicable share up to the APR of 25% & 30% for each\n             notified crops in irrigated and rainfed districts respectively. The applicability of APR\n             for irrigated/unirrigated districts will be on the basis of the district-wise irrigated data\n             submitted by the State/UT Government in the Tender Document and Notification. In\n             case of the same is not submitted by the concerned State/UTs, the data published\n             by Directorate of Economics and Statistics (DES), DA&FW as revised from time to\n             time shall be used.\n\n13.1.3       For the purpose of categorization of Districts between Rainfed and Irrigated, districts\n             having 50% or more of the Gross irrigated area will be categorized as Irrigated.\n\n13.1.4       The State/ UTs are free to extend additional subsidy to reduce the financial burden\n             on farmers.\n\n13.1.5        share  over  and  above  the  normal  subsidy  from  their  budget.  In  other  words,\n             additional  subsidy,  if  any  shall  be  borne  entirely  by  the  State/  UT.  Subsidy  in\n             premium is allowed only to the extent of notiﬁed Sum Insured excluding the Sum\n             Insured for the add-on covers for which GoI subsidy is not payable.\n\n13.1.6       The Government premium subsidy to the implementing Insurance Companies shall\n             be  routed through  a  Central  Nodal  Agency (CNA)  designated  by the GoI  for  the\n             purpose, strictly as per the provisions of the Operational Guidelines and modalities\n             prescribed by the GoI. Accordingly, the designated CNA is empowered to call and\n             collect  all  requisite  information  related  to  implementation  of  the  Scheme  and\n             utilization  of  Government  funds  and  to  share  the  same  with  the  GoI  for  better\n             planning, implementation and monitoring of the Scheme. The premium subsidy will\n             be routed through PFMS/PFMS linked systems strictly based on the data hosed on\n             NCIP for the concerned season/state & cluster.\n\n13.1.7       Governments, both Centre and State, shall release their share of subsidy as outlined\n             in Para 6.1.6 of these guidelines. The release of GoI subsidy shall not be dependent\n             on release of State subsidy for all seasons covered under the scheme including past\n                                            www.pmfby.gov.in\n\n                               Operational Guidelines 2023 of PMFBY                                       48",
+        "similarity": 0.67,
+        "publisher": "Department of Agriculture & Farmers Welfare / PMFBY portal",
+        "sourceUrl": "https://pmfby.amnex.co.in/pmfby/pdf/operational_guidelines_pmfby.pdf",
+        "note": "Effective from Kharif 2023; check current state notification",
+        "number": 2
+      }
+    ],
+    "table": {
+      "headers": [
+        "Season",
+        "Crops",
+        "Maximum Premium Rate payable by farmer (% of Sum Insured)*"
+      ],
+      "rows": [
+        [
+          "Kharif",
+          "All Food grain and Oilseeds crops (all Cereals, Millets, Pulses and Oilseeds crops)",
+          "2.0% of SI or Actuarial rate, whichever is less"
+        ],
+        [
+          "Rabi",
+          "All Food grain and Oilseeds crops (all Cereals, Millets, Pulses and Oilseeds crops)",
+          "1.5% of SI or Actuarial rate, whichever is less"
+        ],
+        [
+          "Kharif and Rabi",
+          "Annual Commercial/ Annual Horticultural crops",
+          "5% of SI or Actuarial rate, whichever is less"
+        ],
+        [
+          "Kharif and Rabi",
+          "Perennial horticultural / commercial crops (pilot basis)",
+          "5% of SI or Actuarial rate, whichever is less"
+        ]
+      ],
+      "pages": [
+        47,
+        48
+      ],
+      "docId": "532d15b9d532c4a3bc77",
+      "docName": "PMFBY_Operational_Guidelines_2023.pdf"
+    },
+    "mode": "document_table",
+    "meta": {
+      "chunks": 2,
+      "latencyMs": 822,
+      "model": "llama3.2:3b"
+    }
+  },
+  {
+    "question": "प्रधानमंत्री फसल बीमा योजना में किसान को कितना प्रीमियम देना होता है?",
+    "language": "HI",
+    "answer": "मूल दस्तावेज़ की प्रीमियम दरें नीचे दी गई हैं। अपने राज्य की वर्तमान अधिसूचना भी जाँचें। तालिका के आँकड़े सीधे PDF से लिए गए हैं। [1]",
+    "sources": [
+      {
+        "docId": "532d15b9d532c4a3bc77",
+        "docName": "PMFBY_Operational_Guidelines_2023.pdf",
+        "page": 47,
+        "snippet": "11.          Digitization of Land Records\n\n11.1         Under  the  Central  Sector  Scheme  of  Digital  India  Land  Record  Modernization\n             Program (DILRMP), majority of the State/UTs have digitized their land records. To\n             address the problems of over insurance and acreage discrepancy, State/UTs are\n             strongly advised to integrate their digitized land records with the NCIP so that the\n             individual  land  records  of  farmers  can  be  accessed  through  the  NCIP  for  crop\n             insurance and the insured area be validated. This will help the Government to reach\n             and identify individual beneﬁciaries and bring utmost transparency and authenticity\n             in  providing  scheme  benefits  to  the  genuine  beneficiaries  as  per  their  eligibility\n             norms in the right spirits of provisions of the Operational Guidelines.\n\n12.          Sum Insured/Coverage Limit\n\n12.1         States/UTs need to choose either the Scale of Finance or Notional Average Value\n             (Notional Average Yield * MSP/Farm Gate) price method for computation of Sum\n             Insured for a district-crop combination for the entire period of the contract. The crop-\n             wise  sum  insured  notiﬁed  in  the  ﬁrst  year/season  could  be  changed  in  the\n             subsequent year/season as per the change in the Scale of ﬁnance or MSP/ Farm\n             gate price as available for the notiﬁed crop and decided upon by the State. However,\n             any  change  in  the  sum  insured  over  a  year  due  to  changes  in  the  scale  of\n             ﬁnance/farm gate price will be capped at 10% within the contract period. The sum\n             Insured for individual farmer is equal to the Scale of ﬁnance or Notional Average\n             Value (NAY x MSP/Farm Gate Price) per hectare multiplied by the insured area of\n             the notiﬁed crop proposed by the farmer for insurance.\n\n12.2         Area under cultivation shall always be expressed in Hectare for all crops including\n             perennial horticulture crops, accordingly the State Governments/UT Administrations\n             are required to mandatorily notify the applicable premium and sum insured values\n             at Per Hectare basis rather than per plant basis.\n\n12.3         In cases where crops are separately notiﬁed under irrigated, rainfed category by the\n             States/UTs,  the  Sum  Insured  value  for  irrigated  and  rainfed  areas  should  be\n             separately indicated and notified.\n\n13.          Premium Rates and Premium Subsidy\n\n13.1         The Actuarial Premium Rate (APR) would be charged under PMFBY& RWBCIS by\n             the implementing Insurance Company. The rate of premium payable by the farmer\n             will be as per the following Table 1:\n\n                                                                             Maximum Premium Rate payable\n       Season                              Crops                                           by farmer\n                                                                                     (% of Sum Insured)*\n                          All Food grain and Oilseeds crops                      2.0% of SI or Actuarial rate,\n        Kharif             (all Cereals, Millets, Pulses and                          whichever is less\n                                     Oilseeds crops)\n                          All Food grain and Oilseeds crops                      1.5% of SI or Actuarial rate,\n         Rabi              (all Cereals, Millets, Pulses and                          whichever is less\n                                     Oilseeds crops)\n                              Annual Commercial/ Annual                           5% of SI or Actuarial rate,\n  Kharif and Rabi                   Horticultural crops                               whichever is less\n                         Perennial horticultural / commercial  5% of SI or Actuarial rate,\n\n                                             www.pmfby.gov.in\n\n                                Operational Guidelines 2023 of PMFBY                                       47",
+        "similarity": 0.653,
+        "publisher": "Department of Agriculture & Farmers Welfare / PMFBY portal",
+        "sourceUrl": "https://pmfby.amnex.co.in/pmfby/pdf/operational_guidelines_pmfby.pdf",
+        "note": "Effective from Kharif 2023; check current state notification",
+        "number": 1
+      },
+      {
+        "docId": "532d15b9d532c4a3bc77",
+        "docName": "PMFBY_Operational_Guidelines_2023.pdf",
+        "page": 48,
+        "snippet": "crops (pilot basis)  whichever is less\n\n  *Note: Premium paid by non-loanee farmers should be rounded off to nearest Rupee.\n\nPayment of Government Subsidy\n\n                All farmers enrolled under the scheme would be entitled for admissible subsidy on the\n             Actuarial Premium. All demands for premium subsidies shall be mandatorily routed\n             through the NCIP by the Insurance Companies and paid through PFMS system by\n             the GoI.\n\n13.1.1       The difference between Actuarial Premium Rate (APR) and the Rate of Insurance\n             premium  payable  by  farmers  shall  be  treated  as  the  Rate  of  Normal  Premium\n             Subsidy, which shall be shared equally in 50:50 ratio by the Centre and State/UTs\n             in all State/UTs except Himalayan & North Eastern Region (NER) State/UTs where\n             subsidy sharing pattern between the Centre and State/UTs shall be in the 90:10\n             ratio.\n\n13.1.2       The full GoI share in the premium subsidy as per sharing pattern in                          Para 13.1.1\n             above will be applicable only up to APR of 25% and 30% with respect to irrigated\n             and rainfed areas/district, respectively. For APR beyond those rates, GoI share of\n             subsidy will be limited to the applicable share up to the APR of 25% & 30% for each\n             notified crops in irrigated and rainfed districts respectively. The applicability of APR\n             for irrigated/unirrigated districts will be on the basis of the district-wise irrigated data\n             submitted by the State/UT Government in the Tender Document and Notification. In\n             case of the same is not submitted by the concerned State/UTs, the data published\n             by Directorate of Economics and Statistics (DES), DA&FW as revised from time to\n             time shall be used.\n\n13.1.3       For the purpose of categorization of Districts between Rainfed and Irrigated, districts\n             having 50% or more of the Gross irrigated area will be categorized as Irrigated.\n\n13.1.4       The State/ UTs are free to extend additional subsidy to reduce the financial burden\n             on farmers.\n\n13.1.5        share  over  and  above  the  normal  subsidy  from  their  budget.  In  other  words,\n             additional  subsidy,  if  any  shall  be  borne  entirely  by  the  State/  UT.  Subsidy  in\n             premium is allowed only to the extent of notiﬁed Sum Insured excluding the Sum\n             Insured for the add-on covers for which GoI subsidy is not payable.\n\n13.1.6       The Government premium subsidy to the implementing Insurance Companies shall\n             be  routed through  a  Central  Nodal  Agency (CNA)  designated  by the GoI  for  the\n             purpose, strictly as per the provisions of the Operational Guidelines and modalities\n             prescribed by the GoI. Accordingly, the designated CNA is empowered to call and\n             collect  all  requisite  information  related  to  implementation  of  the  Scheme  and\n             utilization  of  Government  funds  and  to  share  the  same  with  the  GoI  for  better\n             planning, implementation and monitoring of the Scheme. The premium subsidy will\n             be routed through PFMS/PFMS linked systems strictly based on the data hosed on\n             NCIP for the concerned season/state & cluster.\n\n13.1.7       Governments, both Centre and State, shall release their share of subsidy as outlined\n             in Para 6.1.6 of these guidelines. The release of GoI subsidy shall not be dependent\n             on release of State subsidy for all seasons covered under the scheme including past\n                                            www.pmfby.gov.in\n\n                               Operational Guidelines 2023 of PMFBY                                       48",
+        "similarity": 0.653,
+        "publisher": "Department of Agriculture & Farmers Welfare / PMFBY portal",
+        "sourceUrl": "https://pmfby.amnex.co.in/pmfby/pdf/operational_guidelines_pmfby.pdf",
+        "note": "Effective from Kharif 2023; check current state notification",
+        "number": 2
+      }
+    ],
+    "table": {
+      "headers": [
+        "Season",
+        "Crops",
+        "Maximum Premium Rate payable by farmer (% of Sum Insured)*"
+      ],
+      "rows": [
+        [
+          "Kharif",
+          "All Food grain and Oilseeds crops (all Cereals, Millets, Pulses and Oilseeds crops)",
+          "2.0% of SI or Actuarial rate, whichever is less"
+        ],
+        [
+          "Rabi",
+          "All Food grain and Oilseeds crops (all Cereals, Millets, Pulses and Oilseeds crops)",
+          "1.5% of SI or Actuarial rate, whichever is less"
+        ],
+        [
+          "Kharif and Rabi",
+          "Annual Commercial/ Annual Horticultural crops",
+          "5% of SI or Actuarial rate, whichever is less"
+        ],
+        [
+          "Kharif and Rabi",
+          "Perennial horticultural / commercial crops (pilot basis)",
+          "5% of SI or Actuarial rate, whichever is less"
+        ]
+      ],
+      "pages": [
+        47,
+        48
+      ],
+      "docId": "532d15b9d532c4a3bc77",
+      "docName": "PMFBY_Operational_Guidelines_2023.pdf"
+    },
+    "mode": "document_table",
+    "meta": {
+      "chunks": 2,
+      "latencyMs": 7779,
+      "model": "llama3.2:3b"
+    }
+  },
+  {
+    "question": "How does grievance redressal work under PMFBY?",
+    "language": "EN",
+    "answer": "Grievances are received through multiple channels such as calls, mobile app, Chatbot, social media, email, handwritten applications, and walk-in grievances. The grievance is then taken to a logical conclusion to the satisfaction of the farmer. The turnaround time for grievances and queries on the grievance portal is 15 days. The grievance redressal mechanism involves the Insurance Company, Banks, CSC e-Gov, and the State Governments/UT Administrations. The grievance is registered on the NCIP against a unique ticket number and is shared with the farmer through SMS or Chatbot indicating the tentative resolution timeline.",
+    "sources": [
+      {
+        "docId": "532d15b9d532c4a3bc77",
+        "docName": "PMFBY_Operational_Guidelines_2023.pdf",
+        "page": 137,
+        "snippet": "structure  created  by  the  State/UT  Government.  The  State/UT  Government  shall\n             have  access  to  the  entire  process  and  this  portal  shall  act  as  a  platform for  the\n             State/UTs for grievance redressal and their monitoring. There will be landlord-tenant\n             framework  where  the  platform  shall  be  provided  by  the  GoI  and  the  State\n             Governments/UT  Administrations  will  be  completely  responsible  for  day  to  day\n             functioning of effective grievance redressal mechanism for their own State/UT. GoI\n             shall  only  act  as  the  facilitator  and the  responsibility  of  redressal  and  closure  of\n             grievances shall vest with the Insurance Companies, Banks, CSC e-Gov and the\n             State Governments/UT Administrations.\n\n30.6.4       The  system shall not only take the  grievances/queries through calls  but will also\n             facilitate  those  grievances  from  the  farmers  which  are  received  through  other\n             sources  like  mobile  app,  Chatbot,  social  media,  email,  handwritten  applications,\n             walk-in grievances lodged by the farmers at local State, District or Taluka Agriculture\n             Office or Insurance Company.\n\n30.6.5       Every  grievance  shall  be  taken  to  a  logical  conclusion  to  the  satisfaction  of  the\n             farmer. Every grievance will have a Ticket ID with ticket closure responsibility lying\n             with the Insurance Company, State/UT and Bank respectively as per the type of\n             grievance.  The turnaround  time for the grievances and  queries on the  grievance\n             portal shall be 15 days. Grievances which are tagged to State/UT officials will be\n             dealt with exclusively by the State/UT.\n\n30.6.6       IRDAI already has an Integrated Grievance Management System named as Bima\n             Bharosa, a platform for complaint registration and grievance redressal, which shall\n             also  be  integrated with KRPH for real-time  information sharing  and  escalation  of\n             grievances which stands unresolved with the Insurance Company within the given\n             period of 15 days. Further, similar integrations shall also be done with respective\n             grievance redressal portals of RBI, States/UTs specific grievance redressal portals\n             and  Central  Govt.  portal  i.e.  CPGRMS  etc.  comprehensive  visibility  and  quick\n             resolution of all types of grievances and complaints related to multiple stakeholders\n             under PMFBY.\n\n30.6.7       Any grievance resolved by the respective stakeholders shall be liable for re-opening\n             in case the concerned farmer is not satisfied with the resolution.\n\n30.7         Grievance Redressal Mechanism by Insurance Company\n\n30.7.1       Each implementing Insurance Company will put in place an effective and resilient\n             Grievance  Redressal  Mechanism  for  resolution  and  disposal  of  all  grievances\n             received through multiple channels viz. Krishi Rakshak Portal & Helpline, their own\n             Toll-Free Call Centres, Social Media, Tehsil Level Grievance Cell, DGRC, SGRC,\n             IRDAI,   Insurance   Ombudsmen,   Banks,   SLBC,   Centralized   Public   Grievance\n             Redressal   and   Monitoring   System   (CPGRAMS),   respective   State   Grievance\n             Redressal and Monitoring System (GRAMS) and similar entities and directly through\n             farmer in the form of application/complaint letter. A designated resource/manpower\n             at each tehsil level shall be equipped to handle and resolve grievances of farmers\n             at local level and he/she should be able to participate in Tehsil/Taluk level grievance\n             meetings and dispose-off the grievances.\n\n30.7.2       Similarly, senior resource persons at the District and State level should be equipped\n             to participate in DGRC and SGRC meeting to resolve such grievances.\n\n                                              www.pmfby.gov.in\n\n                                 Operational Guidelines 2023 of PMFBY                                          137",
+        "similarity": 0.609,
+        "publisher": "Department of Agriculture & Farmers Welfare / PMFBY portal",
+        "sourceUrl": "https://pmfby.amnex.co.in/pmfby/pdf/operational_guidelines_pmfby.pdf",
+        "note": "Effective from Kharif 2023; check current state notification",
+        "number": 1
+      },
+      {
+        "docId": "532d15b9d532c4a3bc77",
+        "docName": "PMFBY_Operational_Guidelines_2023.pdf",
+        "page": 135,
+        "snippet": "dissatisfaction, the matter may be brought before the                     Appellate Committee (AC)\n             constituted viz. District Level Grievance Redressal Committee (DGRC).\n\n30.3         Appellate  Committee  (AC)/DGRC  at  District  Level: In  line  with  the  DLMC,  an\n             Appellate   Committee   (AC)/DGRC   shall   also   be   constituted   for   redressal   of\n             grievances   of   Farmers,   Banks,   Insurance   Company,   CSC-VLE,   Insurance\n             Intermediaries, District Authority/Department. This Committee will be headed by the\n             District Magistrate (DM*)/Collector and the representatives of Farmers, Lead District\n             Manager (LDM/Banks, District Development Manager (DDM) NABARD, Insurance\n             Company         and         concerned         District         Authority/Department         (i.e,\n             Agriculture/Horticulture/Cooperative/Revenue/  Agricultural  Statistics  etc.)  shall  be\n             appointed as members. This Committee may also invite subject specialists/experts\n             from  Universities/IMD/commodity  Boards/Research  Institutions,  SRSAC  etc.,  if\n             deemed necessary. If the AC is satisfied that there is an error of judgement by the\n             by the grievance redressal officer at the Tehsil / Taluk level then it may admit the\n             appeal filed before it. The AC shall record the averments of the appellant as well as\n             all the connected parties, examine the issues raised in the light of the operational\n             guidelines and dispose the matter within 15 days by passing a speaking order and\n             the grievance shall be treated as closed. However, in case if the AC is of the view\n             that the appeal is not admissible, it shall reject the same in writing by recording the\n             reasons thereof.\n\n\n\n30.4         State Level Grievance Redressal Committee (SGRC):  The State/UT shall also\n             constitute a State Level Grievance Redressal Committee for redressal of grievance\n             of   Farmers,   Banks,   Insurance   Company,   CSC-VLE,   CSC   eGov,   Insurance\n             Intermediaries, District Authority/Department  unsettled  at  the  level  of  the  DGRC.\n             This Committee will be headed by the Principal Secretary/Secretary of the Nodal\n             Department,  SLBC/Banks,  Chief  General  Manager  (CGM)  NABARD,  Insurance\n             Company  and  the  concerned  State  Authority/Department  shall  be  appointed  as\n             members.  This  Committee   may  also  invite  subject  specialists/  experts  from\n             Agriculture University/ IMD/ research institutions/commodity Boards/, State Remote\n             Sensing  Application  Centre,  SRSAC,  STSU,  STAC,  concerned  MITRs  etc.,  if\n             deemed necessary.\n\n30.5         The  grievances  which have wider  scope of effect impacting  a greater number  of\n             districts or there is a breach of guidelines by any of the stakeholder or the grievance\n             matter exceeds Rs. 25 Lakh in monetary terms, such matters may be directly raised\n             at  the  level  of  the  State  Level  Grievance  Redressal  Committee  (SGRC).  The\n             Committee will dispose of the grievance within 15 days from the time of receipt of\n             grievance. The decision of the Committee shall be accepted by all the parties. The\n             States/UTs shall notify the constitution of such a grievance redressal committee and\n             make wide publicity amongst farmers along with the name, address, email ID and\n             contact  number  of  grievance redressal  ofﬁcer.  State/UTs may  also  nominate  the\n             State  level  Grievance  Redressal  Ofﬁcers  at  the  rank  of  Director  to  register  and\n             dispose  of  grievances  not  in  the  purview  of  District  Level  Grievance  Redressal\n             Committee  (DGRC)  In  addition,  the  State/UTs  shall  strictly  comply  and  take  the\n             responsibility of the following activities:\n       A.    Strengthening of the different levels of Grievance Redressal Committee (GRCs) and\n             the Appellate Committees for resolving the grievances at the ground level (Taluka /\n\n                                             www.pmfby.gov.in\n\n                                Operational Guidelines 2023 of PMFBY                                         135",
+        "similarity": 0.59,
+        "publisher": "Department of Agriculture & Farmers Welfare / PMFBY portal",
+        "sourceUrl": "https://pmfby.amnex.co.in/pmfby/pdf/operational_guidelines_pmfby.pdf",
+        "note": "Effective from Kharif 2023; check current state notification",
+        "number": 2
+      },
+      {
+        "docId": "532d15b9d532c4a3bc77",
+        "docName": "PMFBY_Operational_Guidelines_2023.pdf",
+        "page": 138,
+        "snippet": "30.7.3       Insurance  Company  shall  ensure  that  details  of  the  grievance  redressal  ofﬁcers\n             along with the name, address and contact number and email id is publicized widely\n             among farmers. Insurance Companies will have to dispose the grievance within 15\n             days’ time of receipt of each and every grievance/complaint.\n\n30.7.4       Insurance Company shall have to mandatorily prepare and submit monthly report\n             containing  details  of  all  such  grievances  reported  and  their  disposal  status  to\n             respective Grievance Redressal Committees in the 1                     st week of next month.\n\n30.7.5       All the queries, complaints or grievances related to the scheme shall mandatorily be\n             ported and handled through Krishi Rakshak Portal & Helpline.\n\n30.8         Committee to Examine the Additional Claims Arising due to Errors,\n             Omissions and Commissions of the ﬁnancial Institutions\n\n30.8.1       A   committee   has   been   be   constituted   under   the   chairpersonship   of   CEO-\n             PMFBY/Joint  Secretary  (Credit),  DA&FW  with  the  representatives  of  Internal\n             Finance  Division  (IFD),  DA&FW,  concerned  State/UT  Government,  Insurance\n             Companies to examine and dispose the issues related to additional claims arising\n             due  to  errors  or  omissions  and  commissions  of  the  Bank  branches,  CSC-VLEs,\n             Insurance  Intermediaries  etc.,  which  are  beyond  the  available  provisions  of  the\n             Operational Guidelines and remains un-disposed and un-resolved despite having\n             undergone though various grievance redressal committees at District/State Level to\n             facilitate the redressal of  disputes and grievances.\n\n30.8.2       The   Committee   may   also   invite   the   senior   executive/ofﬁcers   of   concerned\n             stakeholders to present their cases before the committee.\n\n30.8.3       The Committee will take ﬁnal decision in this regard including recommendation for\n             the  payment  of  admissible  government  subsidy  to  facilitate  the  payment  of\n             admissible  claims  and/  or  payment  of  such  additional  and  full  liabilities  towards\n             admissible   claims   by   concerned   ﬁnancial   institution   or   concerned   Insurance\n             Company.\n\n30.8.4       The  committees  constituted  at  Tehsil/District  or  State  level  under  PMFBY  for\n             redressal of various disputes and grievances of the stakeholders should examine\n             and  dispose  of  grievances  including  the  grievances  and  issues  pertaining  to  old\n             seasons as per the provisions of the Operational Guidelines applicable during the\n             respective  seasons.  Any  clariﬁcation  /  interpretation  of  the  provisions  of  these\n             Guidelines solely lies with the GoI.\n\n31           Empanelment and Selection of Insurance Companies (ICs)\n\n31.1         Empanelment Criteria\n\n31.1.1       All the General Insurance Companies including specialized Insurance Companies\n             as empaneled by DA&FW, GoI and selected by concerned State Governments/UT\n             Administrations  through  a  tendering  process,  shall  implement  PMFBY.  Once  an\n             Insurance  Company  has  been  empaneled  by  DA&FW,  it  is  considered  as  pre-\n             qualiﬁed Company to bid for selection as Implementing Agency (IA)                          through tenders\n             published    by    the    State/UTs    and    to    undertake    implementation    of    the\n             Scheme/Program  in  accordance  with  the  advisories,  directions  and  Operational\n             Guidelines issued by DA&FW, GoI from time to time                     .\n                                             www.pmfby.gov.in\n\n                                Operational Guidelines 2023 of PMFBY                                         138",
+        "similarity": 0.58,
+        "publisher": "Department of Agriculture & Farmers Welfare / PMFBY portal",
+        "sourceUrl": "https://pmfby.amnex.co.in/pmfby/pdf/operational_guidelines_pmfby.pdf",
+        "note": "Effective from Kharif 2023; check current state notification",
+        "number": 3
+      },
+      {
+        "docId": "532d15b9d532c4a3bc77",
+        "docName": "PMFBY_Operational_Guidelines_2023.pdf",
+        "page": 136,
+        "snippet": "District level).\n       B.    Required  capacity  building  shall  be  provided  to  the  ofﬁcials  concerned  with\n             Grievance Redressal and its timely resolution and disposal.\n       C.    Systematic functioning of such Committees at various levels with proper reporting\n             mechanism and documentation.\n       D.    Timely  disposal of  the Grievances and intimation of the status  of  disposal  to the\n             complainant with proper tracking mechanism.\n       E.    Avoiding   procedural   delays   in   channelizing   the   Grievances   to   ofﬁcials   and\n             organizations  for  taking  necessary  action  and  strict  adherence  to  the  timelines\n             defined in these Guidelines.\n       F.    Proper documentation of the Grievances and Disposal status shall be ensured for\n             further  tracking  by  the  State/UTs  and  the  GoI  and  for  disposal  of  complaints  or\n             queries raised by farmers, public representatives etc., through RTIs or by any such\n             Government provided Citizen rights mechanism for ensuring greater transparency\n             and accountability of the stakeholders within the Scheme.\n       G.    The  status  of  the  grievance  receipts  and  disposal  shall  be  regularly  updated  by\n             concerned  Insurance  Companies,  Banks,  State/UTs  or  the  GoI  on  respective\n             platforms e.g. CPGRMS, KRPH and on social media handles of PMFBY maintained\n             by the GoI and the respective State/ UTs.\n\n30.6         Krishi Rakshak Portal & Helpline (KRPH)\n\n30.6.1       A dedicated Centralized Toll-free Number, under the aegis of Krishi Rakshak Portal\n             & Helpline (KRPH) has been set-up for query resolution and grievance redressal of\n             farmers. Any query or complaint of the farmer will be registered on the NCIP against\n             a unique ticket number. The ticket number will be shared with the farmer through\n             SMS  or  Chatbot  indicating  the  tentative  resolution  timeline.  Simple  queries  or\n             complaints shall be resolved by the concerned agent handling the call whereas the\n             serious complaints and grievances which the agents are not able to resolve shall be\n             further  forwarded to the  concerned  Stakeholder viz. Insurance Company,  Banks,\n             CSC e-Gov or nodal departments of the States/UTs. The concerned Stakeholder\n             shall provide the resolution electronically within given timelines defined by GoI. The\n             solution or redressal shall be intimated to the farmer through a feedback telephonic\n             call and also through NCIP, Chatbot & Mobile App basis the information given by\n             the concerned stakeholder on NCIP and/or KRPH.\n\n30.6.2       The  Krishi  Rakshak  Portal  shall  be  the  centralized  system  equipped  with  the\n             necessary   features   viz.,   Complaint/Query   capturing   through   multiple   modes\n             (electronic, telephonic and conventional or physical mode), farmer authentication &\n             online   ticket   creation   and   forwarding   to  the   concerned   stakeholders,   online\n             escalation   as   per   escalation   matrix,   updating   of   resolution   details,   MIS   &\n             Dashboards for data analysis and visualization.\n\n30.6.3       The  farmers’  grievances  would  be  registered  and  transmitted  to  the  concerned\n             Insurance  Company,  banks,  CSC  e-Gov,  State,  Districts  or  Bank  users  etc.,  for\n             resolution  within  a  definite  turn-around-time.  At  each  stakeholder,  the  query  or\n             grievance shall have multiple escalation levels from lowest to highest and shall have\n             maximum  15  days  to  dispose  the  same.  Any  appeal  against  the  decision  of  the\n             stakeholder shall be at the lowest defined level of the stratified grievance redressal\n\n                                              www.pmfby.gov.in\n\n                                 Operational Guidelines 2023 of PMFBY                                          136",
+        "similarity": 0.572,
+        "publisher": "Department of Agriculture & Farmers Welfare / PMFBY portal",
+        "sourceUrl": "https://pmfby.amnex.co.in/pmfby/pdf/operational_guidelines_pmfby.pdf",
+        "note": "Effective from Kharif 2023; check current state notification",
+        "number": 4
+      },
+      {
+        "docId": "dd5b8eef4e395f4529a2",
+        "docName": "Cooperation_Annual_Report_2024_25.pdf",
+        "page": 24,
+        "snippet": "parameters, including audit compliance, operational activities, financial performance,\ninfrastructure, and basic identity information.\n\n        A new National Cooperation Policy is being framed to aid in policy -making for\nthe sector. Further, significant emphasis is being laid on cooperative education and\ntraining.\n\n        National Cooperative Development Corporation (NCDC), which is a statutory\norganization, involved in planning, promoting and financing cooperative development\nprogrammes at the national level, has been strengthened to cater to the needs of the\nsector and is on its way to becoming one of the most trusted credit providers of this\nsector. Several important initiatives and schemes have also been launched by NCDC\nto aid the development of cooperatives.\n\n        List of initiatives taken by the Ministry and progress made so far is placed at\nAnnexure-II.\n\n1.5.2 VIGILANCE MATTERS\n\n        Vigilance Unit has been set up in the Ministry under Additional Secretary,\ndesignated as the Chief Vigilance Officer (CVO) to ensure a transparent, responsive\nand corruption free work environment through surveillance and preventive & punitive\nmeasures.\n\n1.5.3 GRIEVANCES REDRESSAL MECHANISM\n\n        A Public Grievance redressal mechanism has been established in the Ministry.\nDeputy Secretary/ Director level officers have been designated as grievance redressal\nofficers to deal with all grievances relating to their subject matters. Since 01.04.2024\ntill 31.03.2025,  a total of 5,046 public grievances were received out of which 4866\ngrievances have been disposed.\n\n        The status of Grievances as per CPGRAMS portal for the year 2024 -2025 (from\n01.04.2024 to 31.03.2025) is as follows:\n\n  Sl.       CPGRAMS Source                   Received            Disposed             Disposed\n No.                                                                                 percentage\n 1.      Direct from complainant                3,085               2,956                95.81\n\n\n\n                                                  8",
+        "similarity": 0.483,
+        "publisher": "Ministry of Cooperation",
+        "sourceUrl": "https://cooperation.gov.in/sites/default/files/2026-03/511_Annual%20Report%202024-25%20%28Final%29.pdf",
+        "note": "Reporting period 2024–25",
+        "number": 5
+      }
+    ],
+    "mode": "generated",
+    "meta": {
+      "chunks": 5,
+      "latencyMs": 14769,
+      "model": "llama3.2:3b",
+      "retrievalQuestion": "How does grievance redressal work under PMFBY?"
+    }
+  },
+  {
+    "question": "What are the membership conditions in the PACS model bye-laws?",
+    "language": "EN",
+    "answer": "According to the PACS Model Bye-laws, there are two types of membership: 'A'-Class Members and 'B'-Class Members. 'A'-Class Members are shareholders who can exercise all membership rights, while 'B'-Class Members are nominal members who can receive non-farm sector loans and other non-credit facilities. The eligibility for 'A'-Class Membership includes being a promoter, an individual with agricultural land, a state government or government body, and others. 'B'-Class Members can be self-help groups, joint liability groups, farmers, and others who desire to have a business relationship with the Society.",
+    "sources": [
+      {
+        "docId": "eb5baa8183aafe70abc6",
+        "docName": "PACS_Model_Byelaws_2023.pdf",
+        "page": 10,
+        "snippet": "CHAPTER III\n                                                 MEMBERSHIP\n7. MEMBERSHIP:\n(1)        TYPES OF MEMBERSHIP: The Society shall have two types of membership or\ntypes of membership as provided by the State Act/ Rules.\n        “A”-CLASS MEMBERS: ‘A’ class members are the shareholders of the Society\nwho can exercise all the membership rights as provided in the Byelaws.\n        “B”-CLASS MEMBERS: ‘B’ class members are nominal members of the Society.\n\n(2)     ELIGIBILITY FOR ‘A’ CLASS MEMBERSHIP:\nThe following persons, subject to fulfillment of the eligibility condition, shall be A-Class\nMembers:\n    a)  The promoters at the time of registration of Society;\n    b)  An Individual who,\n        i)   is  competent  to  contract  under  the  provision  of  Section  11  of  the  Indian\n             Contract  Act  1872      (above   18  years  of  age,  having  a  sound  mind  and  not\n             debarred by any Law) and\n        ii)  possesses agricultural land or         land for allied agricultural activities or rearing\n             domestic cattle in the area of operation of the Society;\n        iii) is not a member of any other PACS in any other Panchayat/ Village;\n             (If there is no PACS in the Panchayat/ Village, the members can avail benefits\n             of the nearby PACS after approval of the Registrar)\n    c)  State Government or any other Government Body;\n\n  (3) ELIGIBILITY AND OTHER CONDITIONS FOR ‘B’-CLASS MEMBERSHIP:\n    a)  A  person  who  desires  to  have  a  business  relationship  with  Society  shall  be\n        admitted as nominal member by payment of admission fee of Rs.10/- which is non-\n        refundable and shall be credited to Reserve Fund of the Society.\n\n    b)  Self Help Groups/ Joint Liability Groups/ Farmers Interest Groups, Tenant farmers,\n        share  croppers,  oral  lessees  or  users  of  land,  agricultural  labourers,  micro\n        entrepreneurs, rural artisans and persons involved in other allied activities shall be\n        admitted as nominal members of the Society.\n\n\n                                                     8",
+        "similarity": 0.557,
+        "publisher": "Ministry of Cooperation",
+        "sourceUrl": "https://www.cooperation.gov.in/sites/default/files/2023-06/Model%20Byelaws%2005.01.02023.pdf",
+        "note": "Model: verify adoption under your state law",
+        "number": 1
+      },
+      {
+        "docId": "eb5baa8183aafe70abc6",
+        "docName": "PACS_Model_Byelaws_2023.pdf",
+        "page": 14,
+        "snippet": "i)  to receive a copy of proceeding recorded in the minute book pertaining to General\n         Body meetings and Board of Director meetings;\n     j)  to get the copy of Act, Rules and up-to-date Byelaws of the Society;\n     k)  to inspect copies of any inquiry or special audit report; and\n     l)  to avail voting right in the Society, subject to transacting the minimum services as\n         decided by the General Body of the Society in accordance with the Act, Rule and\n         Byelaws.\n\n    2. “B” CLASS Members- Nominal Members: Every nominal member shall have the\n        following rights:\n     a) To receive non-farm sector loan and other non-credit facilities rendered by Society\n        on the terms and conditions decided by the Society;\n     b) To receive an incentive up to 10% of the total dividend arising out of the Non                  -farm\n        loans extended to the Nominal Members;\n     c) To provide facilities owned by them which              may be beneficial for Society and its\n        members on mutually decided terms and conditions within or outside the area                         of\n        the operation of the Society.\n\n(8)  DUTIES OF MEMBER:\n     a)  Every applicant before being admitted to the membership of the Society shall sign\n         a declaration that he has read and understood the provisions of the Byelaws and\n         shall be bound by the Byelaws of the           Society, Acts and Rules.\n     b)  A member who is already a member by reason of having joined the application\n         for  Registration  is  required  to  sign  such  declaration  within  one  month  of  the\n         Registration of the Society.\n     c)  No  member  shall  exercise  any  right  of  membership  until  he  has  signed  the\n         declaration as referred to above and has paid the admission fee and the full value\n         of shares subscribed by him.\n\n(9)  LIABILITIY OF MEMEBRS:\nThe ‘A’ class members of the Society shall, in the event of liquidation/dissolution, be jointly\nand severally liable to contribute towards deficit in the assets, limited to the extent of share\ncapital subscribed or paid by him.\n\n                                                      12",
+        "similarity": 0.568,
+        "publisher": "Ministry of Cooperation",
+        "sourceUrl": "https://www.cooperation.gov.in/sites/default/files/2023-06/Model%20Byelaws%2005.01.02023.pdf",
+        "note": "Model: verify adoption under your state law",
+        "number": 2
+      },
+      {
+        "docId": "eb5baa8183aafe70abc6",
+        "docName": "PACS_Model_Byelaws_2023.pdf",
+        "page": 12,
+        "snippet": "(5) PROCEDURE FOR MEMBERSHIP:\n   a)   Any person who is desirous of becoming a member of the Society and is eligible\n        as per the Byelaws, may obtain an application form at a prescribed fee and may\n        submit the duly filled application form to the Chief Executive Officer (CEO) of the\n        Society.\n   b)   KYC is mandatory for adding new members in the Society. Registration can also\n        be done online.\n   c)   The CEO shall place the application form             before the Board of Directors for final\n        decision who shall decide within a maximum period of 6 months from the date of\n        receipt of application.\n   d)   The CEO shall inform the applicant of the decision of the Board of Directors within\n        15 days of the Board meeting and if admitted, ask him to deposit the admission\n        fee and share money along with necessary documents as specified by the Board\n        of  Directors,   like  identity/ residence/     land  holding  proof,  resolution  of  informal\n        group/ other cooperative Society etc. on submission of which the applicant shall\n        be admitted as member of the Society.\n   e)   Appeal against denial of membership can be filed                before the Registrar and the\n        decision of the Registrar will be final.\n   f)   Every  individual  shall  subscribe  at  least  five  shares  (Rs.           100/-   each  share)\n        amounting to Rs. 500/- of the Society to become an A-Class Member. The member\n        shall also have to pay an admission fee of Rs. 10/- at the time of admission, which\n        shall be non-refundable.\n   g)   The admitted members should be educated about cooperative values, principles,\n        their rights and philosophy and the services/facilities and benefits available in the\n        Society.\n\n(6)  SHARES SUBSCRIPTION BY THE MEMBERS:\n   a)   Maximum shareholding by a member except Government shall be limited to 1/5th\n\n        of the total subscribed share capital of the Society.\n   b)   Every  Individual  to  whom  shares  are  allotted  shall  be entitled  to receive share\n        certificate specifying therein number of shares allotted to him and amount paid by\n        him.\n                                                     10",
+        "similarity": 0.58,
+        "publisher": "Ministry of Cooperation",
+        "sourceUrl": "https://www.cooperation.gov.in/sites/default/files/2023-06/Model%20Byelaws%2005.01.02023.pdf",
+        "note": "Model: verify adoption under your state law",
+        "number": 3
+      },
+      {
+        "docId": "dd5b8eef4e395f4529a2",
+        "docName": "Cooperation_Annual_Report_2024_25.pdf",
+        "page": 171,
+        "snippet": "ANNEXURE-II: PROGRESS  ON  MAJOR INITIATIVES  TAKEN BY THE\n\n                         MI NI ST R Y ( AS ON MARCH, 2025)\n\n\n       Ministry of Cooperation, since its inception on 06.07.2021, has undertaken\nseveral initiatives to realize the vision of “Sahakar-se-Samriddhi” and to strengthen &\ndeepen  the  cooperative movement from  Primary to  Apex   level Cooperatives  in the\ncountry. List of initiatives taken and progress made so far are as follows:\n\nA.         Making Primary Cooperatives economically vibrant and transparent\n\n       1. Model Bye-Laws for PACS making them multipurpose,\n           multidimensional and transparent entities: Government, in\n           consultation with  all the  stakeholders,  including  States/ UTs, National\n           Level Federations, State Cooperative Banks (StCBs), District Central\n           Cooperative Banks (DCCBs), etc., has prepared and circulated Model\n           Bye-laws for PACS to all the States/ UTs, which enable PACS to\n           undertake more than 25 business activities, improve governance,\n           transparency and accountability in their operations. Provisions have also\n           been made to make the membership of PACS more inclusive and broad  -\n           based, giving adequate representation to women and Scheduled\n           Castes/Schedules Tribes. So far, 32 States/ UTs have adopted Model\n           Bye-laws or their existing bye-laws are in line with Model Bye -laws.\n\n       2. Strengthening of PACS through Computerization: In order to\n           strengthen PACS, project for Computerization of functional PACS with\n           an outlay of ₹2,516 Crore has been approved by the Government of\n           India, which entails bringing all functional PACS in the Country onto a\n           common ERP based national software, linking them with NABARD\n           through StCBs and DCCBs. A total of 79,630 PACS from 31 States/ UTs\n           have been sanctioned under the project. A total of 60,353 PACS have\n           been onboarded on ERP Software and hardware has been procured by\n           31 States/UTs.\n\n       3.              Establishing New Multipurpose PACS/ Dairy/ Fishery Cooperatives\n           in covering all the Panchayats: The Government of India has approved\n           the plan to establish new multipurpose PACS/dairy/fisheries\n\n\n                                               155",
+        "similarity": 0.65,
+        "publisher": "Ministry of Cooperation",
+        "sourceUrl": "https://cooperation.gov.in/sites/default/files/2026-03/511_Annual%20Report%202024-25%20%28Final%29.pdf",
+        "note": "Reporting period 2024–25",
+        "number": 4
+      },
+      {
+        "docId": "eb5baa8183aafe70abc6",
+        "docName": "PACS_Model_Byelaws_2023.pdf",
+        "page": 11,
+        "snippet": "c)  Any organization registered under any Act in India (or abroad) shall be admitted\n        as nominal member for business purpose only.\n    d)  Nominal Members shall have no right to attend any meeting, or to vote in the affairs\n        of the Society and will not be entitled for dividend from the Society.\n    e)  Nominal  members  cannot  contest  in  election  for  the  member  of  the  Board  of\n        Directors in the Society.\n    f)  A Nominal member who is indebted to the Society either in his personal capacity\n        or as surety or guarantor shall continue to be such member so long as the liability\n        to the Society has not been fully discharged.\n    g)  No share certificate shall be issued to nominal members but separate Register\n        shall  be  maintained  in  the  Society,        which  shall  contain  his  signature  and  full\n        address as proof of his membership.\n\n(4)   INELIGIBILITY OR DISQUALIFICATION OF MEMBERS:\nA person shall not be eligible for admission or continuing as member of the Society, and\nshall cease to be member, if he:\n   a)   has been sentenced for an offence involving moral turpitude, such sentence not\n        having been reversed;\n   b)   has been convicted for any other offence by a Court of Law and sentenced to\n        imprisonment for three months or more unless a period of 5 years has elapsed\n        since his release;\n   c)   is adjudicated as bankrupt or insolvent;\n   d)   has been expelled by the Society or by any other Cooperative Society within a\n        period of 2 years from the date of such expulsion;\n   e)   has defaulted in payment of any dues including contributions, subscriptions, if any,\n        as decided by the Board of Directors of the Society from time to time and has not\n        made the payment within 30 days after receiving the notice of payment;\n   f)   is of unsound mind;\n   g)   is in the business of providing loans;\n   h)   is a member of another cooperative Society which is providing similar services;\n   i)   is a defaulter of any bank/ financial institution/ Society;\n   j)   does  not  use  any  services  or  products  of  the          Society  and  remains  absent  in\n        General Body for three consecutive years;\n   k)   possesses any other disqualification as per the provisions of the Act                / Rules.\n                                                      9",
+        "similarity": 0.45,
+        "publisher": "Ministry of Cooperation",
+        "sourceUrl": "https://www.cooperation.gov.in/sites/default/files/2023-06/Model%20Byelaws%2005.01.02023.pdf",
+        "note": "Model: verify adoption under your state law",
+        "number": 5
+      }
+    ],
+    "mode": "generated",
+    "meta": {
+      "chunks": 5,
+      "latencyMs": 8216,
+      "model": "llama3.2:3b",
+      "retrievalQuestion": "What are the membership conditions in the PACS model bye-laws? membership eligibility admission application"
+    }
+  },
+  {
+    "question": "What is the launch code for a spaceship on Mars?",
+    "language": "EN",
+    "answer": "I cannot find enough evidence in the uploaded documents to answer this. Please upload the relevant rule, scheme notification or by-law. For a personal dispute, confirm the applicable state and contact the relevant authority.",
+    "sources": [],
+    "mode": "abstained",
+    "meta": {
+      "chunks": 0,
+      "latencyMs": 4894,
+      "model": "llama3.2:3b",
+      "retrievalQuestion": "What is the launch code for a spaceship on Mars?"
+    }
+  }
+]

@@ -16,3 +16,10 @@ chroma_db/
 # Environment
 .env
 .DS_Store
+
+# Generated local knowledge base and user uploads
+/backend/knowledge.sqlite3*
+/data/uploads/
+/logs/
+
+/tmp/

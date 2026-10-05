@@ -1,11 +1,11 @@
 {
   "title": "SahayBot",
-  "description": "SahayBot offers advanced legal assistance through an intuitive chatbot interface, enabling users to manage documents and receive reliable legal insights efficiently.",
+  "description": "SahayBot: English and Hindi cooperative governance, PACS, crop insurance and grievance guidance grounded in official PDFs. SIH26088.",
   "robots": {
     "index": false
   },
   "accessibility": {
-    "addBypassLinks": false,
+    "addBypassLinks": true,
     "ignoreReducedMotion": false
   }
 }

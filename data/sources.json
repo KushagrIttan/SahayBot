@@ -1,0 +1,46 @@
+[
+  {
+    "filename": "PACS_Model_Byelaws_2023.pdf",
+    "url": "https://www.cooperation.gov.in/sites/default/files/2023-06/Model%20Byelaws%2005.01.02023.pdf",
+    "resolved_url": "https://www.cooperation.gov.in/sites/default/files/2023-06/Model%20Byelaws%2005.01.02023.pdf",
+    "publisher": "Ministry of Cooperation",
+    "topic": "PACS model bye-laws",
+    "note": "Model: verify adoption under your state law",
+    "downloaded": "2026-10-05",
+    "sha256": "73da054f87a57f1ffe14b8ae9716690f0554c4913b9a8c1da9634db7aa866dfd",
+    "pages": 37
+  },
+  {
+    "filename": "Cooperation_Annual_Report_2024_25.pdf",
+    "url": "https://cooperation.gov.in/sites/default/files/2026-03/511_Annual%20Report%202024-25%20%28Final%29.pdf",
+    "resolved_url": "https://cooperation.gov.in/sites/default/files/2026-03/511_Annual%20Report%202024-25%20%28Final%29.pdf",
+    "publisher": "Ministry of Cooperation",
+    "topic": "Schemes and PACS services",
+    "note": "Reporting period 2024–25",
+    "downloaded": "2026-10-05",
+    "sha256": "3031ac001490c82caae9cfc1872201092a431bb028ec2cd99f344550e2f08619",
+    "pages": 192
+  },
+  {
+    "filename": "PMFBY_Operational_Guidelines_2023.pdf",
+    "url": "https://pmfby.amnex.co.in/pmfby/pdf/operational_guidelines_pmfby.pdf",
+    "resolved_url": "https://pmfby.amnex.co.in/pmfby/pdf/operational_guidelines_pmfby.pdf",
+    "publisher": "Department of Agriculture & Farmers Welfare / PMFBY portal",
+    "topic": "Crop insurance and grievances",
+    "note": "Effective from Kharif 2023; check current state notification",
+    "downloaded": "2026-10-05",
+    "sha256": "5252ce3a62b66a448e083d87405c7ab8f8d50a360a8b5df6f97dfbfe9008c875",
+    "pages": 213
+  },
+  {
+    "filename": "RBI_Financial_Inclusion_2019_24.pdf",
+    "url": "https://www.rbi.org.in/commonman/Upload/English/Content/PDFs/English_16042021.pdf",
+    "resolved_url": "https://www.rbi.org.in/commonman/Upload/English/Content/PDFs/English_16042021.pdf",
+    "publisher": "Reserve Bank of India",
+    "topic": "Financial literacy and consumer protection",
+    "note": "Strategy period 2019–24; educational reference",
+    "downloaded": "2026-10-05",
+    "sha256": "634985066afa65411bd84714c79c9e7f35633af53e5a290e0c905b0978a331d9",
+    "pages": 50
+  }
+]

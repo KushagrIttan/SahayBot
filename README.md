@@ -39,6 +39,8 @@ python -m backend.ingest
 ./scripts/run_demo.sh
 ```
 
+On a Linux machine without an NVIDIA GPU, installing CPU PyTorch first avoids downloading large CUDA dependencies: `pip install torch --index-url https://download.pytorch.org/whl/cpu`, then install the backend requirements.
+
 Open **http://localhost:5173**. Ollama must be running (`ollama serve` if your installation does not run it as a service). Initial embedding download/indexing can take a few minutes. Subsequent starts reuse the index. The API is at http://127.0.0.1:8000/docs.
 
 Alternatively use two terminals:

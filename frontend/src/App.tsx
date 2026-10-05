@@ -220,7 +220,7 @@ function SourceTable({
 }) {
   return (
     <div className="document-table">
-      <div className="table-caption">
+      <div className="source-table-label">
         {lang === "HI"
           ? "PDF से निकाली गई तालिका"
           : "Table extracted from the PDF"}{" "}

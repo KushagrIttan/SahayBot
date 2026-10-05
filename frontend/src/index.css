@@ -1202,7 +1202,7 @@ nav {
   }
 }
 .document-table { margin-top: 16px; }
-.table-caption { font-size: 10px; font-weight: 600; color: #5c7c4f; margin-bottom: 8px; }
+.source-table-label { font-size: 10px; font-weight: 600; color: #5c7c4f; margin-bottom: 8px; }
 .table-scroll { overflow-x: auto; border: 1px solid #d4e0c9; border-radius: 8px; }
 .document-table table { width: 100%; min-width: 390px; border-collapse: collapse; font-size: 11px; line-height: 1.6; }
 .document-table th { background: #e9f0e0; text-align: left; font-weight: 600; padding: 12px; }
